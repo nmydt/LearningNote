@@ -90,7 +90,7 @@ Hadoop3.x：与Hadoop2.x相比
 
 ### Hadoop生态圈组件及其功能
 
-![](Hadoop 基础.assets/1.png)
+![](Hadoop基础.assets/1.png)
 
 ## Hadoop安装
 
@@ -178,13 +178,12 @@ node1免密登录node2设置：
 
 **缺点：**
 
-
-      1. 不能做到低延迟
-         由于Hadoop针对高数据吞吐量做了优化，牺牲了获取数据的延迟，所以对于低延迟数据访问，不适合Hadoop，对于低延迟的访问需求，HBase是更好的选择，
-      2. 不适合大量的小文件存储
-         由于Namenode将文件系统的元数据存储在内存中，因此该文件系统所能存储的文件总数受限于namenode的内存容量，根据经验，每个文件、目录和数据块的存储信息大约占150字节。因此，如果大量的小文件存储，每个小文件会占一个数据块，会使用大量的内存，有可能超过当前硬件的能力。
-      3. 不适合多用户写入文件，修改文件
-         Hadoop2.0虽然支持文件的追加功能，但是还是不建议对HDFS上的文件进行修改，因为效率低。对于上传到HDFS上的文件，不支持修改文件，HDFS适合一次写入，多次读取的场景。HDFS不支持多用户同时执行写操作，即同一时间，只能有一个用户执行写操作。
+    1. 不能做到低延迟
+       由于Hadoop针对高数据吞吐量做了优化，牺牲了获取数据的延迟，所以对于低延迟数据访问，不适合Hadoop，对于低延迟的访问需求，HBase是更好的选择，
+    2. 不适合大量的小文件存储
+       由于Namenode将文件系统的元数据存储在内存中，因此该文件系统所能存储的文件总数受限于namenode的内存容量，根据经验，每个文件、目录和数据块的存储信息大约占150字节。因此，如果大量的小文件存储，每个小文件会占一个数据块，会使用大量的内存，有可能超过当前硬件的能力。
+    3. 不适合多用户写入文件，修改文件
+       Hadoop2.0虽然支持文件的追加功能，但是还是不建议对HDFS上的文件进行修改，因为效率低。对于上传到HDFS上的文件，不支持修改文件，HDFS适合一次写入，多次读取的场景。HDFS不支持多用户同时执行写操作，即同一时间，只能有一个用户执行写操作。
 
 ### HDFS的组成和架构
 
@@ -220,7 +219,7 @@ SecondaryNameNode职责：定期把NameNode的fsimage和edits下载到本地并�
 
 ### HDFS读流程
 
-![image-20211210002543711](Hadoop 基础.assets/2.png)
+![image-20211210002543711](Hadoop基础.assets/2.png)
 
 1. HDFS客户端通过DistributedFileSystem对象的open()方法打开要读取的文件。
 2. DistributedFileSystem负责向远程的NameNode发起RPC调用，得到文件数据块信息，返回数据块列表。对于每个数据块，NameNode返回该数据块的DataNode地址。这些返回的DN 地址，会按照集群拓扑结构得出 DataNode 与客户端的距离，然后进行排序，排序两个规则：网络拓扑结构中距离 Client 近的排靠前；心跳
@@ -232,7 +231,7 @@ SecondaryNameNode职责：定期把NameNode的fsimage和edits下载到本地并�
 
 ### HDFS写流程
 
-![image-20211209140232908](Hadoop 基础.assets/3.png)
+![image-20211209140232908](Hadoop基础.assets/3.png)
 
 1. 客户端调用DistributedFileSystem对象的create()方法创建一个文件输出流对象。
 2. DistributedFileSystem对象向远程的NameNode节点发起RPC调用，NameNode会检查文件是否存在，用户是否有权限新建文件。如果满足条件，则返回给客户端一个可以上传的信息。
@@ -423,7 +422,7 @@ HDFS 文件的限额配置允许我们以文件个数，或者文件大小来限
 hdfs dfs -count -q -h /user/root/dir1 #查看配额信息
 ```
 
-结果：![image-20211209162030888](Hadoop 基础.assets/4.png)
+结果：![image-20211209162030888](Hadoop基础.assets/4.png)
 
 ###### 数量限额
 
@@ -474,103 +473,103 @@ hdfs dfsadmin -safemode wait #一直等待直到安全模式结束
 任何一个文件系统，基本上都会有垃圾桶机制，也就是删除的文件，不会直接彻底清掉，我们一把都是将文件放置到垃圾桶当中去，过一段时间之后，自动清空垃圾桶当中的文件，这样对于文件的安全删除比较有保证，避免我们一些误操作，导致误删除文件或者数据
 
 1. 回收站配置两个参数
-    默认值 fs.trash.interval=0，0 表示禁用回收站，可以设置删除文件的存活时
-    间。
-    默认值 fs.trash.checkpoint.interval=0，检查回收站的间隔时间。
-    要求 fs.trash.checkpoint.interval<=fs.trash.interval。
+   默认值 fs.trash.interval=0，0 表示禁用回收站，可以设置删除文件的存活时
+   间。
+   默认值 fs.trash.checkpoint.interval=0，检查回收站的间隔时间。
+   要求 fs.trash.checkpoint.interval<=fs.trash.interval。
 
 2. 启用回收站
-    修改所有服务器的 core-site.xml 配置文件
+   修改所有服务器的 core-site.xml 配置文件
 
   ```xml
-  <!-- 开启 hdfs 的垃圾桶机制，删除掉的数据可以从垃圾桶中回收，单位分钟 -->
-  <property>
-  <name>fs.trash.interval</name>
-  <value>10080</value>
-  </property>
+<!-- 开启 hdfs 的垃圾桶机制，删除掉的数据可以从垃圾桶中回收，单位分钟 -->
+<property>
+<name>fs.trash.interval</name>
+<value>10080</value>
+</property>
   ```
 
 3. 查看回收站
-    回收站在集群的 /user/root/.Trash/ 这个路径下
+   回收站在集群的 /user/root/.Trash/ 这个路径下
 
 4. 通过 javaAPI 删除的数据，不会进入回收站，需要调用 moveToTrash()才会进入回收
-    站
+   站
 
   ```java
-  //使用回收站的方式: 删除数据
-  @Test
-  public void deleteFile() throws Exception{
-      //1. 获取 FileSystem 对象
-      Configuration configuration = new Configuration();
-      FileSystem fileSystem = FileSystem.get(new URI("hdfs://node01:8020"), confi
-      guration, "root");
-      //2. 执行删除操作
-      // fileSystem.delete(); 这种操作会直接将数据删除, 不会进入垃圾桶
-      Trash trash = new Trash(fileSystem,configuration);
-      boolean flag = trash.isEnabled(); // 是否已经开启了垃圾桶机制
-      System.out.println(flag);
-      trash.moveToTrash(new Path("/quota"));
-      //3. 释放资源
-      fileSystem.close();
-  }
+//使用回收站的方式: 删除数据
+@Test
+public void deleteFile() throws Exception{
+    //1. 获取 FileSystem 对象
+    Configuration configuration = new Configuration();
+    FileSystem fileSystem = FileSystem.get(new URI("hdfs://node01:8020"), confi
+    guration, "root");
+    //2. 执行删除操作
+    // fileSystem.delete(); 这种操作会直接将数据删除, 不会进入垃圾桶
+    Trash trash = new Trash(fileSystem,configuration);
+    boolean flag = trash.isEnabled(); // 是否已经开启了垃圾桶机制
+    System.out.println(flag);
+    trash.moveToTrash(new Path("/quota"));
+    //3. 释放资源
+    fileSystem.close();
+}
   ```
 
 5. 恢复回收站数据
-    hdfs dfs -mv trashFileDir hdfsdir
-    trashFileDir ：回收站的文件路径
-    hdfsdir ：将文件移动到 hdfs 的哪个路径下
+   hdfs dfs -mv trashFileDir hdfsdir
+   trashFileDir ：回收站的文件路径
+   hdfsdir ：将文件移动到 hdfs 的哪个路径下
 
 6. 清空回收站
-    hdfs dfs -expunge
+   hdfs dfs -expunge
 
 ##### 快照
 
 快照顾名思义，就是相当于对我们的 hdfs 文件系统做一个备份，我们可以通过快照对我们指定的文件夹设置备份，但是添加快照之后，并不会立即复制所有文件，而是指向同一个文件。当写入发生时，才会产生新文件
 
 1. 快照使用基本语法
-1、 开启指定目录的快照功能
-hdfs dfsadmin -allowSnapshot 路径
-2、禁用指定目录的快照功能（默认就是禁用状态）
-hdfs dfsadmin -disallowSnapshot 路径
-3、给某个路径创建快照 snapshot
-hdfs dfs -createSnapshot 路径
-4、指定快照名称进行创建快照 snapshot
-hdfs dfs -createSanpshot 路径 名称
-5、给快照重新命名
-hdfs dfs -renameSnapshot 路径 旧名称 新名称
-6、列出当前用户所有可快照目录
-hdfs lsSnapshottableDir
-7、比较两个快照的目录不同之处
-hdfs snapshotDiff 路径 1 路径 2
-8、删除快照 snapshot
-hdfs dfs -deleteSnapshot <path> <snapshotName>
+   1、 开启指定目录的快照功能
+   hdfs dfsadmin -allowSnapshot 路径
+   2、禁用指定目录的快照功能（默认就是禁用状态）
+   hdfs dfsadmin -disallowSnapshot 路径
+   3、给某个路径创建快照 snapshot
+   hdfs dfs -createSnapshot 路径
+   4、指定快照名称进行创建快照 snapshot
+   hdfs dfs -createSanpshot 路径 名称
+   5、给快照重新命名
+   hdfs dfs -renameSnapshot 路径 旧名称 新名称
+   6、列出当前用户所有可快照目录
+   hdfs lsSnapshottableDir
+   7、比较两个快照的目录不同之处
+   hdfs snapshotDiff 路径 1 路径 2
+   8、删除快照 snapshot
+   hdfs dfs -deleteSnapshot <path> <snapshotName>
 2. 快照操作实际案例
-1、开启与禁用指定目录的快照
-[root@node01 hadoop-2.6.0-cdh5.14.0]# hdfs dfsadmin -allowSnapshot /user
-Allowing snaphot on /user succeeded
-[root@node01 hadoop-2.6.0-cdh5.14.0]# hdfs dfsadmin -disallowSnapshot /user
-Disallowing snaphot on /user succeeded
-2、对指定目录创建快照
-注意：创建快照之前，先要允许该目录创建快照
-[root@node01 hadoop-2.6.0-cdh5.14.0]# hdfs dfsadmin -allowSnapshot /user
-Allowing snaphot on /user succeeded
-[root@node01 hadoop-2.6.0-cdh5.14.0]# hdfs dfs -createSnapshot /user
-Created snapshot /user/.snapshot/s20190317-210906.549
-通过 web 浏览器访问快照
-http://node01:50070/explorer.html#/user/.snapshot/s20190317-210906.549
-3、指定名称创建快照
-[root@node01 hadoop-2.6.0-cdh5.14.0]# hdfs dfs -createSnapshot /user mysnap1
-Created snapshot /user/.snapshot/mysnap1
-4、重命名快照
-hdfs dfs -renameSnapshot /user mysnap1 mysnap2
-5、列出当前用户所有可以快照的目录
-hdfs lsSnapshottableDir
-6、比较两个快照不同之处
-hdfs dfs -createSnapshot /user snap1
-hdfs dfs -createSnapshot /user snap2
-hdfs snapshotDiff snap1 snap2
-7、删除快照
-hdfs dfs -deleteSnapshot /user snap1
+   1、开启与禁用指定目录的快照
+   [root@node01 hadoop-2.6.0-cdh5.14.0]# hdfs dfsadmin -allowSnapshot /user
+   Allowing snaphot on /user succeeded
+   [root@node01 hadoop-2.6.0-cdh5.14.0]# hdfs dfsadmin -disallowSnapshot /user
+   Disallowing snaphot on /user succeeded
+   2、对指定目录创建快照
+   注意：创建快照之前，先要允许该目录创建快照
+   [root@node01 hadoop-2.6.0-cdh5.14.0]# hdfs dfsadmin -allowSnapshot /user
+   Allowing snaphot on /user succeeded
+   [root@node01 hadoop-2.6.0-cdh5.14.0]# hdfs dfs -createSnapshot /user
+   Created snapshot /user/.snapshot/s20190317-210906.549
+   通过 web 浏览器访问快照
+   http://node01:50070/explorer.html#/user/.snapshot/s20190317-210906.549
+   3、指定名称创建快照
+   [root@node01 hadoop-2.6.0-cdh5.14.0]# hdfs dfs -createSnapshot /user mysnap1
+   Created snapshot /user/.snapshot/mysnap1
+   4、重命名快照
+   hdfs dfs -renameSnapshot /user mysnap1 mysnap2
+   5、列出当前用户所有可以快照的目录
+   hdfs lsSnapshottableDir
+   6、比较两个快照不同之处
+   hdfs dfs -createSnapshot /user snap1
+   hdfs dfs -createSnapshot /user snap2
+   hdfs snapshotDiff snap1 snap2
+   7、删除快照
+   hdfs dfs -deleteSnapshot /user snap1
 
 快照和镜像的区别：快照仅针对某个特定时刻的数据进行拷贝，无法记录在此之后的数据变化，快照的目标是将系统数据恢复至错误发生以前的某个时间。镜像则需时刻保证目标数据和拷贝数据的一致，目的是保证数据冗余，在数据源发生故障时能够迅速恢复。当用户目标数据源损坏，快照回滚将丢失最新修改的数据，而镜像则可以将其完整复原，以保证业务的连续。
 
@@ -590,20 +589,22 @@ YARN的主要进程：ResourceManager、NodeManager。
 
 ### YARN的架构
 
-![image-20211210002455753](Hadoop 基础.assets/5.png)
+![image-20211210002455753](Hadoop基础.assets/5.png)
 
 1. **ResourceManager**
-    RM 是一个全局的资源管理器，负责整个系统的资源管理和分配，它主要由两个部分组成：调度器（Scheduler）和应用程序管理器（ApplicationManager）。Scheduler根据容量、队列等限制条件，将系统中的资源分配给正在运行的应用程序，在保证容量、公平性和服务等级的前提下，优化集群资源利用率，让所有的资源都被充分利用 。
-    ApplicationManager负责管理整个系统中的所有的应用程序，包括应用程序的提交、与Scheduler协商资源以启动 ApplicationMaster、监控 ApplicationMaster 运行状态并在失败时重启它。
+   RM 是一个全局的资源管理器，负责整个系统的资源管理和分配，它主要由两个部分组成：调度器（Scheduler）和应用程序管理器（ApplicationManager）。Scheduler根据容量、队列等限制条件，将系统中的资源分配给正在运行的应用程序，在保证容量、公平性和服务等级的前提下，优化集群资源利用率，让所有的资源都被充分利用 。
+   ApplicationManager负责管理整个系统中的所有的应用程序，包括应用程序的提交、与Scheduler协商资源以启动 ApplicationMaster、监控 ApplicationMaster 运行状态并在失败时重启它。
 2. **ApplicationMaster**
-    用户提交的一个应用程序会对应于一个 ApplicationMaster，它的主要功能有：
+   用户提交的一个应用程序会对应于一个 ApplicationMaster，它的主要功能有：
+
   - 与 RM 调度器协商以获得资源，资源以 Container 表示。
   - 与 NameNode通信以启动/停止任务。
   - 与NodeManager协同工作完成任务的执行和监控；负责应用监控，重启失败任务。
+
 3. **NodeManager**
-NodeManager 是每个节点上的资源和任务管理器，一方面，它会定期地向 RM 汇报本节点上的资源使用情况和各个 Container 的运行状态；另一方面，他接收并处理来自 AM 的 Container 启动和停止请求。
+   NodeManager 是每个节点上的资源和任务管理器，一方面，它会定期地向 RM 汇报本节点上的资源使用情况和各个 Container 的运行状态；另一方面，他接收并处理来自 AM 的 Container 启动和停止请求。
 4. **Container**
-Container 是 YARN 中的资源抽象，封装了各种资源。一个应用程序会分配一个Container，这个应用程序只能使用这个 Container 中描述的资源。不同于 MapReduceV1 中槽位 slot 的资源封装，Container 是一个动态资源的划分单位，更能充分利用资源。
+   Container 是 YARN 中的资源抽象，封装了各种资源。一个应用程序会分配一个Container，这个应用程序只能使用这个 Container 中描述的资源。不同于 MapReduceV1 中槽位 slot 的资源封装，Container 是一个动态资源的划分单位，更能充分利用资源。
 
 ### YARN调度器
 
@@ -614,13 +615,13 @@ Apache 版本的 hadoop 默认使用的是 Capacity Scheduler 调度方式。CDH
 
 1. **FIFO Scheduler（先进先出调度器）：**
 
-   ![](Hadoop 基础.assets/6.png)
+   ![](Hadoop基础.assets/6.png)
 
    FIFO Scheduler 把应用按提交的顺序排成一个队列，这是一个先进先出队列，在进行资源分配的时候，先给队列中最头上的应用进行分配资源，待最头上的应用需求满足后再给下一个分配，以此类推。但是大的应用可能会占用所有集群资源，这就导致其它应用被阻塞。
 
 2. **Capacity Scheduler（容器调度器）：**
 
-   ![](Hadoop 基础.assets/7.png)
+   ![](Hadoop基础.assets/7.png)
 
    Capacity Scheduler容量调度是多用户调度器，它以队列为单位划分资源。每个队列可设定一定比例的资源最低保证和使用上限。每个用户也可设置一定的资源使用上限，以防资源滥用。并支持资源共享，将队列剩余资源共享给其他队列使用。
 
@@ -628,7 +629,7 @@ Apache 版本的 hadoop 默认使用的是 Capacity Scheduler 调度方式。CDH
 
 3. **Fair Scheduler（公平调度器）：**
 
-   ![](Hadoop 基础.assets/8.png)
+   ![](Hadoop基础.assets/8.png)
 
    Fair 调度器是一个队列资源分配方式，会为所有运行的 job 动态的调整系统资源。当集群只有一个任务时，此任务会占用集群的全部资源，当其他的任务提交后，那些释放的资源会被分配给新的任务，所以每个任务最终都能获得几乎一样多的资源。
 
@@ -686,7 +687,7 @@ Mapreduce默认的分区是HashPartitioner，优点是可以把数据打散，�
 
 shuffle 是 Mapreduce 的核心，它分布在 Mapreduce 的 map 阶段和 reduce阶段。一般把从 Map 产生输出开始到 Reduce 取得数据作为输入之前的过程称作 shuffle。
 
-![](Hadoop 基础.assets/9.png)
+![](Hadoop基础.assets/9.png)
 
 **Map端**
 
@@ -756,6 +757,7 @@ LOCATION '/usr/test/data/students.txt';
 ```
 
 #### Hive 分区表
+
 分区表的每一个分区都对应数据库中相应分区列的一个索引，但是其组织方式和传统的关系型数据库不同。
 
 在 Hive 中，分区表的每一个分区都对应表下的一个目录，所有的分区的数据都存储在对应的目录中。
@@ -776,6 +778,7 @@ STORE AS SEQUENCEFILE;
 ```
 
 #### Hive 分桶表
+
 桶表就是对指定列进行哈希(hash)计算，然后会根据 hash 值进行切分数据，将
 具有不同 hash 值的数据写到每个桶对应的文件中。
 将数据按照指定的字段进行分成多个桶中去，说白了就是将数据按照字段进行划
@@ -794,6 +797,7 @@ STORE AS SEQUENCEFILE;
 ```
 
 #### Hive 视图
+
 在 Hive 中，视图是逻辑数据结构，可以通过隐藏复杂数据操作（Joins, 子查
 询, 过滤,数据扁平化）来于简化查询操作。
 与关系数据库不同的是，Hive 视图并不存储数据或者实例化。一旦创建 HIve 视
