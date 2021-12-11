@@ -90,7 +90,7 @@ Hadoop3.x：与Hadoop2.x相比
 
 ### Hadoop生态圈组件及其功能
 
-![](Image/Hadoop 基础.assets/1.png)
+![](../Image/Hadoop 基础.assets/1.png)
 
 ## Hadoop安装
 
@@ -220,7 +220,7 @@ SecondaryNameNode职责：定期把NameNode的fsimage和edits下载到本地并�
 
 ### HDFS读流程
 
-![image-20211210002543711](Image/Hadoop 基础.assets/2.png)
+![image-20211210002543711](../Image/Hadoop 基础.assets/2.png)
 
 1. HDFS客户端通过DistributedFileSystem对象的open()方法打开要读取的文件。
 2. DistributedFileSystem负责向远程的NameNode发起RPC调用，得到文件数据块信息，返回数据块列表。对于每个数据块，NameNode返回该数据块的DataNode地址。这些返回的DN 地址，会按照集群拓扑结构得出 DataNode 与客户端的距离，然后进行排序，排序两个规则：网络拓扑结构中距离 Client 近的排靠前；心跳
@@ -232,7 +232,7 @@ SecondaryNameNode职责：定期把NameNode的fsimage和edits下载到本地并�
 
 ### HDFS写流程
 
-![image-20211209140232908](Image/Hadoop 基础.assets/3.png)
+![image-20211209140232908](../Image/Hadoop 基础.assets/3.png)
 
 1. 客户端调用DistributedFileSystem对象的create()方法创建一个文件输出流对象。
 2. DistributedFileSystem对象向远程的NameNode节点发起RPC调用，NameNode会检查文件是否存在，用户是否有权限新建文件。如果满足条件，则返回给客户端一个可以上传的信息。
@@ -423,7 +423,7 @@ HDFS 文件的限额配置允许我们以文件个数，或者文件大小来限
 hdfs dfs -count -q -h /user/root/dir1 #查看配额信息
 ```
 
-结果：![image-20211209162030888](Image/Hadoop 基础.assets/4.png)
+结果：![image-20211209162030888](../Image/Hadoop 基础.assets/4.png)
 
 ###### 数量限额
 
@@ -590,7 +590,7 @@ YARN的主要进程：ResourceManager、NodeManager。
 
 ### YARN的架构
 
-![image-20211210002455753](Image/Hadoop 基础.assets/5.png)
+![image-20211210002455753](../Image/Hadoop 基础.assets/5.png)
 
 1. **ResourceManager**
     RM 是一个全局的资源管理器，负责整个系统的资源管理和分配，它主要由两个部分组成：调度器（Scheduler）和应用程序管理器（ApplicationManager）。Scheduler根据容量、队列等限制条件，将系统中的资源分配给正在运行的应用程序，在保证容量、公平性和服务等级的前提下，优化集群资源利用率，让所有的资源都被充分利用 。
@@ -614,13 +614,13 @@ Apache 版本的 hadoop 默认使用的是 Capacity Scheduler 调度方式。CDH
 
 1. **FIFO Scheduler（先进先出调度器）：**
 
-   ![](Image/Hadoop 基础.assets/6.png)
+   ![](../Image/Hadoop 基础.assets/6.png)
 
    FIFO Scheduler 把应用按提交的顺序排成一个队列，这是一个先进先出队列，在进行资源分配的时候，先给队列中最头上的应用进行分配资源，待最头上的应用需求满足后再给下一个分配，以此类推。但是大的应用可能会占用所有集群资源，这就导致其它应用被阻塞。
 
 2. **Capacity Scheduler（容器调度器）：**
 
-   ![](Image/Hadoop 基础.assets/7.png)
+   ![](../Image/Hadoop 基础.assets/7.png)
 
    Capacity Scheduler容量调度是多用户调度器，它以队列为单位划分资源。每个队列可设定一定比例的资源最低保证和使用上限。每个用户也可设置一定的资源使用上限，以防资源滥用。并支持资源共享，将队列剩余资源共享给其他队列使用。
 
@@ -628,7 +628,7 @@ Apache 版本的 hadoop 默认使用的是 Capacity Scheduler 调度方式。CDH
 
 3. **Fair Scheduler（公平调度器）：**
 
-   ![](Image/Hadoop 基础.assets/8.png)
+   ![](../Image/Hadoop 基础.assets/8.png)
 
    Fair 调度器是一个队列资源分配方式，会为所有运行的 job 动态的调整系统资源。当集群只有一个任务时，此任务会占用集群的全部资源，当其他的任务提交后，那些释放的资源会被分配给新的任务，所以每个任务最终都能获得几乎一样多的资源。
 
@@ -686,7 +686,7 @@ Mapreduce默认的分区是HashPartitioner，优点是可以把数据打散，�
 
 shuffle 是 Mapreduce 的核心，它分布在 Mapreduce 的 map 阶段和 reduce阶段。一般把从 Map 产生输出开始到 Reduce 取得数据作为输入之前的过程称作 shuffle。
 
-![](Image/Hadoop 基础.assets/9.png)
+![](../Image/Hadoop 基础.assets/9.png)
 
 **Map端**
 
