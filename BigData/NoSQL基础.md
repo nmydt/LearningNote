@@ -238,7 +238,7 @@ HBase的逻辑数据模型，是有空值的，但真实的物理存储是无空
     hbase(main):032:0> put 'user', 'rk0002', 'info:name', 'fanbingbing'
     hbase(main):033:0> put 'user', 'rk0002', 'info:gender', 'female'
     hbase(main):034:0> put 'user', 'rk0002', 'info:nationality', '中国'
-    hbase(main):035:0> get 'user', 'rk0002', {FILTER => "ValueFilter(=, 'binary:中国')"}本文档来自
+    hbase(main):035:0> get 'user', 'rk0002', {FILTER => "ValueFilter(=, 'binary:中国')"}
 9. 查询所有数据
     查询 user 表中的所有信息
     scan 'user' 8. 列族查询
