@@ -908,9 +908,9 @@ MySQL中提前准备好数据，测试导入到HDFS
   > --m 2
   ```
 
-  ==只要有--query+sql，就需要加$CONDITIONS，哪怕只有一个maptask。==
+  ==只要有--query+sql，就需要加$CONDITIONS，哪怕只有一个maptask==。
 
-  ==如果只有一个maptask，可以不加--split-by来区分数据，因为处理的是整份数据，无需切分。==
+  ==如果只有一个maptask，可以不加--split-by来区分数据，因为处理的是整份数据，无需切分==。
 
   **原理**：
 
