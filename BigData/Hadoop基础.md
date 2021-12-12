@@ -1,8 +1,6 @@
-# 第1章 Hadoop 理论基础
+# 第1章 初识Hadoop大数据技术
 
-## 初识Hadoop大数据技术
-
-### GFS思想
+## 1.1 GFS思想
 
 论文”The Google File System“ 描述了一个分布式文件系统的设计思路。
 
@@ -15,7 +13,7 @@ GFS架构中提到以下几点：
 3. GFS Master与每个块服务器通信（发送心跳包），发送指令，获取状态。
 4. GFS存储的文件都被分割成固定大小的块，每个块都会被复制到多个服务器上。块的冗余度默认为3。
 
-### Hadoop版本的演变
+## 1.2 Hadoop版本的演变
 
 Hadoop2.x：与Hadoop1.x相比，Hadoop2.x采用全新的架构，增加了YARN（通用资源调度框架），支持HDFS的Federation（联邦）、HA（High Availability）等。
 
@@ -42,7 +40,7 @@ Hadoop3.x：与Hadoop2.x相比
    | 2.x端口 | 3.x端口 | name                                 | desc                                                 |
    | ------- | ------- | ------------------------------------ | ---------------------------------------------------- |
    | 50091   | 9869    | dfs.namenode.secondary.https-address | The secondary namenode HTTPS server address and port |
-   | 50090   | 9868    | dfs.namenode.secondary.http-address  | The secondary namenode HTTP server address and port  |
+   | 50090   | 9868    | dfs.namenode.secondary.http-address  | The secondary namenode HTTPS server address and port |
 
    * * *
 
@@ -57,9 +55,9 @@ Hadoop3.x：与Hadoop2.x相比
 
    **Yarn 端口**
 
-   | 2.x端口 | 3.x端口 | name                                | desc                          |
-   | ------- | ------- | ----------------------------------- | ----------------------------- |
-   |         | 8088    | yarn.resourcemanager.webapp.address | ResourceManager对外web ui地址 |
+   | 2.x端口 | 3.x端口 | name                                | desc         |
+   | ------- | ------- | ----------------------------------- | ------------ |
+   | 8080    | 8088    | yarn.resourcemanager.webapp.address | http服务端口 |
 
    * * *
 
@@ -67,7 +65,7 @@ Hadoop3.x：与Hadoop2.x相比
 
 5. HDFS支持可擦除编码（Erasure Encoding）。
 
-### Hadoop的特点
+## 1.3 Hadoop的特点
 
 1. 高容错性
    数据保存多个副本，副本丢失后自动恢复。
@@ -85,24 +83,20 @@ Hadoop3.x：与Hadoop2.x相比
    可构建在廉价机上，实现横向扩展，当集群增加新节点之后，namenode也可以感知，将数据分发和备份到相应的节点上。
 
 
-### 机架感知
+## 1.4 机架感知
 
-定义：在大型 Hadoop 集群中，有多个机架。每个机架由 DataNode 组成。与驻留在不同机架上的 DataNode 之间的通信相比，同一机架上的 DataNode 之间的通信效率更高。
-
-为了减少文件**读/写**期间的网络流量，NameNode 选择最近的 DataNode 来为客户端读/写请求提供服务。NameNode 维护每个 DataNode 的**机架 id**以获取此机架信息。这种根据机架信息选择最近的 DataNode 的概念称为**机架感知**。
-
-副本存储策略为：数据文件默认在 HDFS 上存放三份, 本地一份，同机架内其它某一节点上一份, 不同机架的某一节点上一份。
+定义：机架感知是一种计算不同计算节点的距离的技术，运行任务的时候尽量减少网络带宽的资源消耗。副本存储策略为：数据文件默认在 HDFS 上存放三份, 本地一份，同机架内其它某一节点上一份, 不同机架的某一节点上一份。
 
 - 高可靠性，高可用性(一个机架或节点不能用了，其他机架中的节点仍然保存着数据)
-- 提高网络IO利用率(机架内的机器之间的网络速度通常都会高于跨机架机器之间的网络速度，并且机架之间机器的网络通信通常受到上层交换机间网络带宽的限制。所以数据块只存放在两个不同的机架上，而不是三个机架上，此策略减少了读取数据时需要的网络传输总带宽(两条车道和三条车道的区别)）。
+- 提高IO利用率(机架内的机器之间的网络速度通常都会高于跨机架机器之间的网络速度，并且机架之间机器的网络通信通常受到上层交换机间网络带宽的限制。所以数据块只存放在两个不同的机架上，此策略减少了读取数据时需要的网络传输总带宽(两条车道和三条车道的区别)。
 
-### Hadoop生态圈组件及其功能
+## 1.5 Hadoop生态圈
 
 ![](Hadoop基础.assets/1.png)
 
-## Hadoop安装
+# 第2章 Hadoop安装
 
-### 单机模式安装
+## 2.1 单机模式安装
 
 Hadoop单机模式没有HDFS，只能测试MapReduce程序。MapReduce处理的是本地Linux的文件数据。
 
@@ -112,34 +106,34 @@ Hadoop单机模式没有HDFS，只能测试MapReduce程序。MapReduce处理的�
 | :------------ | --------- | :-------------- | :-------- |
 | hadoop-env.sh | JAVA_HOME | <Your Path>/jdk | JAVA_HOME |
 
-### 伪分布式安装
+## 2.2 伪分布式安装
 
 配置文件:
 
-| 文件名          | 属性名称                      | 属性值                 | 含义                                                 |
-| :-------------- | ----------------------------- | :--------------------- | :--------------------------------------------------- |
-| hadoop-env.sh   | JAVA_HOME                     | <Your Path>/jdk        | JAVA_HOME                                            |
-| core-site.xml   | fs.defaultFS                  | hdfs://<ip>:8020       | 配置NameNode地址，8020是RPC通信端口                  |
-|                 | hadoop.tmp.dir                | <Your Path>/hadoop/tmp | HDFS数据保存在Linux的哪个目录，默认是Linux的/tmp目录 |
-| hdfs-site.xml   | dfs.replication               | 1                      | 副本数                                               |
-| mapred-site.xml | mapreduce.framework.name      | yarn                   | 配置为yarn是集群模式，配置为local表示为本地模式      |
-| yarn-site.xml   | yarn.resourcemanager.hostname | <ip>                   | ResourceManager的IP地址或主机名                      |
-|                 | yarn.nodemanager.aux-services | mapreduce_shuffle      | NodeManager上运行的附属服务                          |
+| 文件名          | 属性名称                      | 属性值                   | 含义                                                 |
+| :-------------- | ----------------------------- | :----------------------- | :--------------------------------------------------- |
+| hadoop-env.sh   | JAVA_HOME                     | `<Your Path>/jdk`        | JAVA_HOME                                            |
+| core-site.xml   | fs.defaultFS                  | `hdfs://<ip>:8020`       | 配置NameNode地址，8020是RPC通信端口                  |
+|                 | hadoop.tmp.dir                | `<Your Path>/hadoop/tmp` | HDFS数据保存在Linux的哪个目录，默认是Linux的/tmp目录 |
+| hdfs-site.xml   | dfs.replication               | 1                        | 副本数                                               |
+| mapred-site.xml | mapreduce.framework.name      | yarn                     | 配置为yarn是集群模式，配置为local表示为本地模式      |
+| yarn-site.xml   | yarn.resourcemanager.hostname | `<ip>`                   | ResourceManager的IP地址或主机名                      |
+|                 | yarn.nodemanager.aux-services | mapreduce_shuffle        | NodeManager上运行的附属服务                          |
 
 
 
-### 完全分布式安装
+## 2.3 完全分布式安装
 
 配置文件:
 
 | 文件名          | 属性名称                      | 属性值                       | 含义                                                         |
 | :-------------- | ----------------------------- | :--------------------------- | :----------------------------------------------------------- |
-| hadoop-env.sh   | JAVA_HOME                     | <Your Path>/jdk              | JAVA_HOME                                                    |
-| core-site.xml   | fs.defaultFS                  | hdfs://<ip>:8020             | 配置NameNode地址，8020是RPC通信端口                          |
-|                 | hadoop.tmp.dir                | <Your Path>/hadoop/tmp       | HDFS数据保存在Linux的哪个目录，默认是Linux的/tmp目录，如果不修改路径的话，系统重启会清空 /tmp 目录下的东西，导致NameNode元数据丢失，是个非常严重的问题 |
+| hadoop-env.sh   | JAVA_HOME                     | `<Your Path>/jdk`            | JAVA_HOME                                                    |
+| core-site.xml   | fs.defaultFS                  | `hdfs://<ip>:8020`           | 配置NameNode地址，8020是RPC通信端口                          |
+|                 | hadoop.tmp.dir                | `<YourPath>/hadoop/tmp`      | HDFS数据保存在Linux的哪个目录，默认是Linux的/tmp目录，如果不修改路径的话，系统重启会清空 /tmp 目录下的东西，导致NameNode元数据丢失，是个非常严重的问题 |
 | hdfs-site.xml   | dfs.replication               | 2                            | 副本数默认为3                                                |
 | mapred-site.xml | mapreduce.framework.name      | yarn                         | 配置为yarn是集群模式，配置为local表示为本地模式              |
-| yarn-site.xml   | yarn.resourcemanager.hostname | <ip>                         | ResourceManager的IP地址或主机名                              |
+| yarn-site.xml   | yarn.resourcemanager.hostname | `<ip>`                       | ResourceManager的IP地址或主机名                              |
 |                 | yarn.nodemanager.aux-services | mapreduce_shuffle            | NodeManager上运行的附属服务                                  |
 | slaves          | DataNode的地址                | 从节点1主机名，从节点2主机名 |                                                              |
 
@@ -151,7 +145,7 @@ Hadoop单机模式没有HDFS，只能测试MapReduce程序。MapReduce处理的�
 
 从节点二：DataNode、NodeManager
 
-### SSH
+## 2.4 SSH
 
 SSH是一种网络协议，用于计算机之间的加密登录。
 
@@ -161,9 +155,9 @@ node1免密登录node2设置：
 - 为了连接node2，向node2追加公钥：ssh-copy-id -i ~/.ssh/id_rsa.pub node2
 - 登录验证：ssh node2
 
-## HDFS
+# 第3章 HDFS
 
-### HDFS优缺点
+## 3.1 HDFS优缺点
 
 **优点：**
 
@@ -193,9 +187,9 @@ node1免密登录node2设置：
   3. 不适合多用户写入文件，修改文件
      Hadoop2.0虽然支持文件的追加功能，但是还是不建议对HDFS上的文件进行修改，因为效率低。对于上传到HDFS上的文件，不支持修改文件，HDFS适合一次写入，多次读取的场景。HDFS不支持多用户同时执行写操作，即同一时间，只能有一个用户执行写操作。
 
-### HDFS的组成和架构
+## 3.2 HDFS的组成和架构
 
-#### NameNode
+### 3.2.1 NameNode
 
 NameNode是HDFS的管理者，职责如下：
 
@@ -203,7 +197,7 @@ NameNode是HDFS的管理者，职责如下：
 - 管理DataNode上的数据块，维持副本数量。
 - 接受客户端请求，如文件上传、下载、创建目录等。
 
-#### DataNode
+### 3.2.2 DataNode
 
 ##### 为什么数据块大小默认为128M
 
@@ -215,7 +209,7 @@ NameNode是HDFS的管理者，职责如下：
 2. 启动DataNode线程，向NameNode定期汇报数据块信息。
 3. 定期向NameNode发送心跳信息保持联系。如果NameNode10分钟没有收到DataNode 的心跳信息，则认为失去联系，并将其上的数据块复制到其他的DataNode。
 
-### SecondaryNameNode
+### 3.2.3 SecondaryNameNode
 
 SecondaryNameNode职责：定期把NameNode的fsimage和edits下载到本地并且加载到内存进行合并，将合并后的fsimage上传回NameNode,这个过程叫检查点。
 
@@ -225,7 +219,7 @@ SecondaryNameNode职责：定期把NameNode的fsimage和edits下载到本地并�
 2. 把NameNode的fsimage和edits下载到本地并且加载到内存，一条条执行edits文件中的更新操作，使得内存中的fsimage保持最新，然后将合并后的fsimage上传回NameNode。
 3. NameNode将接收新的fsimage文件替换旧的，并将edits.new文件更名为edits。
 
-### HDFS读流程
+### 3.2.4 HDFS读流程
 
 ![image-20211210002543711](Hadoop基础.assets/2.png)
 
@@ -237,7 +231,7 @@ SecondaryNameNode职责：定期把NameNode的fsimage和edits下载到本地并�
 5. 当一个节点数据读取完毕时，若文件读取还没有结束，客户端再次请求NameNode获取下一批DataNode地址，连接此文件下一个数据块的最近数据节点。读取完一个 block 都会进行 checksum 验证，把客户端读取到本地的块与 HDFS 上的原始块进行校验，如果发现校验结果不一致，说明读取 DataNode 时出现错误，客户端会通知 NameNode，然后再从下一个拥有该 block 副本的 DataNode 继续读。
 6. 当客户端读取完数据时，调用FsDataInputStream对象的close()方法关闭输入流。最终读取来所有的 block 会合并成一个完整的最终文件。
 
-### HDFS写流程
+### 3.2.5 HDFS写流程
 
 ![image-20211209140232908](Hadoop基础.assets/3.png)
 
@@ -249,28 +243,30 @@ SecondaryNameNode职责：定期把NameNode的fsimage和edits下载到本地并�
 6. 管道上的数据节点反向返回确认信息，最终由管道的第一个数据节点将整条管道的确认信息发送给客户端。
 7. 当一个block传输完成之后, 客户端再次请求NameNode上传第二个block，NameNode 重新选择可用的一组数据节点给 客户端。最后客户端完成写入，调用close()方法关闭文件输出流。
 
-### 数据容错
+## 3.3 数据容错
 
-#### DataNode出错
+### DataNode出错
 
-##### HDFS 在上传文件的时候，如果其中一个 DataNode 突然挂掉了怎么办
+**HDFS 在上传文件的时候，如果其中一个 DataNode 突然挂掉了怎么办**
 
 当 DataNode 突然挂掉了，客户端接收不到这个 DataNode 发送的 ack 确认，客户
 端会通知 NameNode，NameNode 检查该块的副本与规定的不符，NameNode 会通知
 DataNode 去复制副本，并将挂掉的 DataNode 作下线处理，不再让它参与文件上传与下载。
 
-##### 正常情况下DataNode出错怎么办
+**正常情况下DataNode出错怎么办**
 
 每个DataNode都会定期向NameNode发送心跳信号，由于网络割裂等原因导致NameNode无法联系到DataNode，NameNode通过心跳信号的缺失来检测这一情况，并将其标志为宕机，不会再将新的I/O请求发送给它们。NameNode不断检测数据块的状态，一旦发现数据块数量小于设定值，就启动复制操作。
 
-#### NameNode出错
+
+
+### NameNode出错
 
 HDFS中的所有元数据都保存在NameNode上，如果NameNode的edits和fsimage文件损坏，整个HDFS将失效。解决办法：
 
 1. 使用HA(High Available)采用共享存储来存储edits。当NameNode出现故障时，HDFS会自动切换到备用的NameNode上，元数据从共享存储获取。
 2. 运行一个SecondaryNameNode，当NameNode出现故障时，可以用SecondaryNameNode中的元数据信息进行系统恢复，但仍会有部分数据丢失。通常会把这两种方法结合使用。
 
-### HDFS操作
+## 3.4 HDFS操作
 
 #### 基础命令
 
@@ -589,13 +585,13 @@ Federation：HDFS有多个不相关的NameNode，这些NameNode是联合的，�
 
 HDFS HA ：有两个NameNode （主 NN 和备用 NN）。主 NN 将元数据写入共享存储系统，备用 NN 监听该共享存储系统并从共享存储更新元数据。当主 NN 出故障时，备用 NN可快速切换到主NN。对于 HA 架构，需要将两台单独的机器配置为 Namenode，其中只有一台应该在Active状态下运行，另一台Standby（备用）状态。
 
-## YARN
+# 第4章 YARN
 
 设计YARN的最初目的是为了改善MapReduce的实现，后来YARN演变成了一种资源调度框架，具有通用性。
 
 YARN的主要进程：ResourceManager、NodeManager。
 
-### YARN的架构
+## 4.1 YARN的架构
 
 ![image-20211210002455753](Hadoop基础.assets/5.png)
 
@@ -612,12 +608,10 @@ NodeManager 是每个节点上的资源和任务管理器，一方面，它会�
 4. **Container**
 Container 是 YARN 中的资源抽象，封装了各种资源。一个应用程序会分配一个Container，这个应用程序只能使用这个 Container 中描述的资源。不同于 MapReduceV1 中槽位 slot 的资源封装，Container 是一个动态资源的划分单位，更能充分利用资源。
 
-### YARN调度器
+## 4.2 YARN调度器
 
-在 Yarn 中有三种调度器可以选择：FIFO Scheduler ，Capacity Scheduler，Fair
-Scheduler。
-Apache 版本的 hadoop 默认使用的是 Capacity Scheduler 调度方式。CDH 版本的
-默认使用的是 Fair Scheduler 调度方式。
+在 Yarn 中有三种调度器可以选择：FIFO Scheduler ，Capacity Scheduler，Fair Scheduler。
+Apache 版本的 hadoop 默认使用的是 Capacity Scheduler 调度方式。CDH 版本的默认使用的是 Fair Scheduler 调度方式。
 
 1. **FIFO Scheduler（先进先出调度器）：**
 
@@ -639,11 +633,11 @@ Apache 版本的 hadoop 默认使用的是 Capacity Scheduler 调度方式。CDH
 
    Fair 调度器是一个队列资源分配方式，会为所有运行的 job 动态的调整系统资源。当集群只有一个任务时，此任务会占用集群的全部资源，当其他的任务提交后，那些释放的资源会被分配给新的任务，所以每个任务最终都能获得几乎一样多的资源。
 
-## MapReduce
+# 第5章 MapReduce
 
-### MapReduce概述
+## 5.1 MapReduce概述
 
-MapReduce是一种简化的并行计算模型，MapReduce也就是“分而治之，汇总结果”。
+MapReduce是一种简化的并行计算模型，MapReduce也就是“==分而治之，汇总结果==”。
 
 #### MapReduce特点
 
@@ -656,9 +650,9 @@ MapReduce是一种简化的并行计算模型，MapReduce也就是“分而治�
 
 1. 实时计算：MR无法像MySOL一样，在毫秒或秒级内返回结果。
 2. 流式计算：流式计算的输入数据是动态的，而MapReduce的输入数据是静态的，不能动态变化。如Web Server产生的日志，这是MR不擅长的。
-3. DAG（有向图）计算：多个应用程序存在依赖关系，后一个应用程序的输入为前一个输出。在这种情况下，MR也能做，但是MR做完后，每个MR的输出结果都会写入磁盘，会制造大量的磁盘I/O，降低性能。
+3. DAG（有向无环图）计算：多个应用程序存在依赖关系，后一个应用程序的输入为前一个输出。在这种情况下，MR也能做，但是MR做完后，每个MR的输出结果都会写入磁盘，会制造大量的磁盘I/O，降低性能。
 
-### MapReduce编程模型
+## 5.2 MapReduce编程模型
 
 #### Hadoop的数据类型
 
@@ -707,7 +701,7 @@ shuffle 是 Mapreduce 的核心，它分布在 Mapreduce 的 map 阶段和 reduc
 2. Merge 阶段：在 ReduceTask 远程复制数据的同时，会在后台开启两个线程对内存到本地的数据文件进行合并操作。
 3. Sort 阶段：在对数据进行合并的同时，会进行排序操作，由于 MapTask 阶段已经对数据进行了局部的排序，ReduceTask 只需保证 Copy 的数据的最终整体有效性即可。Shuffle 中的缓冲区大小会影响到 mapreduce 程序的执行效率，原则上说，缓冲区越大，磁盘 io 的次数越少，执行速度就越快。缓冲区的大小可以通过参数调整, 参数：mapreduce.task.io.sort.mb 默认为 100M。
 
-## Hive
+# 第6章 Hive
 
 Hive是一个基于Hadoop的数据仓库工具，可以用于对Hadoop文件中的数据集进行整理、查询、分析。Hive提供了类似于SQL的HiveQL，HiveQL可以转化为MapReduce任务进行运行，而不必开发专门的MapReduce应用。
 
@@ -849,7 +843,7 @@ DROP VIEW
 
 
 
-## Sqoop
+# 第7章 Sqoop
 
 ### Sqoop简介
 
@@ -1081,11 +1075,9 @@ sqoop命令执行导出。
 
 如果想提高效率和进行更多控制，可以直接Java API的方式，从hbase中读出数据，导出到mysql。
 
-## 参考文献
+# 参考文献
 
 > 《Hadoop大数据技术与应用》杨治明 许桂秋主编
->
-> 《Rack Awareness in Hadoop HDFS – An Introductory Guide》 https://data-flair.training/blogs/rack-awareness-hadoop-hdfs/
 >
 > 《HBase过滤器入门教程》http://c.biancheng.net/view/6522.html
 >
