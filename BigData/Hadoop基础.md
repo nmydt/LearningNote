@@ -4,12 +4,10 @@
 
 ### GFS思想
 
-论文”The Google File System“ 描述了一个分布式文件系统的设计思路。GFS架构中提到以下几点：
+论文”The Google File System“ 描述了一个分布式文件系统的设计思路。从交互实体上划分，分布式文件系统有两个两个基本的组成部分：客户端，服务端。
+GFS解决问题的思路：增加一个管理节点，去管理这些存放数据的主机，存放数据的主机成为数据节点，而上传的文件会按固定的大小进行分块。数据节点上保存的是数据块，而非独立的文件。
+MapReduce采用“分而治之”的思想，把对大规模数据集的操作，分发给一个主节点管理下的各个子结点共同完成，然后整合各个子结点的中间结果，得到最终的计算结果。
 
-1. GFS Master节点管理所有的文件系统元数据，包括命名空间、访问控制信息、文件和块的映射信息以及当前块的位置信息。
-2. GFS Master管理系统范围内的活动，比如块服务器之间的数据迁移等。
-3. GFS Master与每个块服务器通信（发送心跳包），发送指令，获取状态。
-4. GFS存储的文件都被分割成固定大小的块，每个块都会被复制到多个服务器上。块的冗余度默认为3。
 
 ### Hadoop版本的演变
 
@@ -84,6 +82,7 @@ Hadoop3.x：与Hadoop2.x相比
 ### 机架感知
 
 定义：机架感知是一种计算不同计算节点的距离的技术，运行任务的时候尽量减少网络带宽的资源消耗。副本存储策略为：数据文件默认在 HDFS 上存放三份, 本地一份，同机架内其它某一节点上一份, 不同机架的某一节点上一份。
+定义：备份的数据块存储在不同机架的不同服务器上，实现冗余备份。
 
 - 高可靠性，高可用性(一个机架或节点不能用了，其他机架中的节点仍然保存着数据)
 - 提高IO利用率(机架内的机器之间的网络速度通常都会高于跨机架机器之间的网络速度，并且机架之间机器的网络通信通常受到上层交换机间网络带宽的限制。所以数据块只存放在两个不同的机架上，此策略减少了读取数据时需要的网络传输总带宽(两条车道和三条车道的区别)。
@@ -117,6 +116,7 @@ Hadoop单机模式没有HDFS，只能测试MapReduce程序。MapReduce处理的�
 | mapred-site.xml | mapreduce.framework.name      | yarn                   | 配置为yarn是集群模式，配置为local表示为本地模式      |
 | yarn-site.xml   | yarn.resourcemanager.hostname | <ip>                   | ResourceManager的IP地址或主机名                      |
 |                 | yarn.nodemanager.aux-services | mapreduce_shuffle      | NodeManager上运行的附属服务                          |
+|.bashrc          |HADOOP_HOME                    |~/hadoop                       |HADOOP_HOME
 
 
 
@@ -134,7 +134,7 @@ Hadoop单机模式没有HDFS，只能测试MapReduce程序。MapReduce处理的�
 | yarn-site.xml   | yarn.resourcemanager.hostname | <ip>                         | ResourceManager的IP地址或主机名                              |
 |                 | yarn.nodemanager.aux-services | mapreduce_shuffle            | NodeManager上运行的附属服务                                  |
 | slaves          | DataNode的地址                | 从节点1主机名，从节点2主机名 |                                                              |
-
+|.bashrc          |HADOOP_HOME                    |~/hadoop                       |HADOOP_HOME
 安装完成后各个节点进程如下：
 
 主节点进程：NameNode、SecondaryNameNode、ResourceManager
@@ -151,7 +151,7 @@ node1免密登录node2设置：
 
 - 进入node1命令行，生成密钥对：ssh-keygen -t  rsa 
 - 为了连接node2，向node2追加公钥：ssh-copy-id -i ~/.ssh/id_rsa.pub node2
-- 登录验证：ssh node2
+- 登录验证：ssh node1
 
 ## HDFS
 
@@ -159,30 +159,23 @@ node1免密登录node2设置：
 
 **优点：**
 
-1. 支持超大文件
+1. 支持处理超大文件
    一般来说，HDFS存储的文件可以支持TB和PB级别的数据。
 
-2. 检测和快速应对硬件故障
-   假设某一个Datanode节点挂掉之后，因为数据备份，还可以从其他节点里找到。Namenode通过心跳机制来检测Datanode是否还存在。
-
-3. 流式数据访问
+2. 支持流式数据访问
    HDFS的数据处理规模比较大，应用一次需要大量的数据，同时这些应用一般都是批量处理，而不是用户交互式处理，应用程序能以流的形式访问数据库。HDFS主要是大数据的吞吐量，而不是访问速度。访问速度最终是要受制于网络和磁盘的速度，机器节点再多，也不能突破物理的局限，HDFS不适合于低延迟的数据访问，HDFS是高吞吐量。
 
-4. 简化的一致性模型
-
-   HDFS应用需要一个“一次写入多次读取”的文件访问模型。一个文件经过创建、写入和关闭之后就不需要改变。这简化了数据一致性问题，并且使高吞吐量的数据访问成为可能。
-
-5. 低成本运行
+3. 低成本运行
 
    HDFS可运行在廉价的商用硬件集群上。
 
 **缺点：**
 
-  1. 不能做到低延迟
+  1. 不适合处理低延迟的数据访问
      由于Hadoop针对高数据吞吐量做了优化，牺牲了获取数据的延迟，所以对于低延迟数据访问，不适合Hadoop，对于低延迟的访问需求，HBase是更好的选择，
-  2. 不适合大量的小文件存储
+  2. 不适合处理大量的小文件。
      由于Namenode将文件系统的元数据存储在内存中，因此该文件系统所能存储的文件总数受限于namenode的内存容量，根据经验，每个文件、目录和数据块的存储信息大约占150字节。因此，如果大量的小文件存储，每个小文件会占一个数据块，会使用大量的内存，有可能超过当前硬件的能力。
-  3. 不适合多用户写入文件，修改文件
+  3. 不适合多用户写入文件及任意修改文件
      Hadoop2.0虽然支持文件的追加功能，但是还是不建议对HDFS上的文件进行修改，因为效率低。对于上传到HDFS上的文件，不支持修改文件，HDFS适合一次写入，多次读取的场景。HDFS不支持多用户同时执行写操作，即同一时间，只能有一个用户执行写操作。
 
 ### HDFS的组成和架构
@@ -191,7 +184,7 @@ node1免密登录node2设置：
 
 NameNode是HDFS的管理者，职责如下：
 
-- 管理和维护HDFS的NameSpace（维护文件系统树及文件树下的所有文件或文件夹的元数据），维护NameSpace中的edits（保存客户端执行的所有写操作）和fsimage(包含HDFS的所有目录和文件的序列化信息)。
+- 管理和维护HDFS的命名空间，维护命名空间中的两个重要文件edits（保存客户端执行的所有写操作）和fsimage(包含HDFS的所有目录和文件的序列化信息)。
 - 管理DataNode上的数据块，维持副本数量。
 - 接受客户端请求，如文件上传、下载、创建目录等。
 
@@ -210,11 +203,13 @@ NameNode是HDFS的管理者，职责如下：
 ### SecondaryNameNode
 
 SecondaryNameNode职责：定期把NameNode的fsimage和edits下载到本地并且加载到内存进行合并，将合并后的fsimage上传回NameNode,这个过程叫检查点。
-
+SecondaryNameNode 通常与NameNode运行在不同的机器上。
+为什么定期合并edits和fsimage？
+  使edits大小保持在限定的范围内，减少了重新启动时NameNode合并fsimage和edits耗费的时间，从而减少NameNode的启动时间，也起到了一个冷备份的作用，在NameNode失效时能恢复部分的fsimage
 工作流程：
 
 1. SecondaryNameNode定期与NameNode进行通信，要求停止使用edits文件，暂时将新的更新操作写到一个新的文件edits.new上，这个操作是瞬间完成的。
-2. 把NameNode的fsimage和edits下载到本地并且加载到内存，一条条执行edits文件中的更新操作，使得内存中的fsimage保持最新，然后将合并后的fsimage上传回NameNode。
+2. 把NameNode的fsimage和edits下载到本地相应的目录下并且将fsimage加载到内存，一条条执行edits文件中的更新操作，使得内存中的fsimage保持最新，然后将fsimage上传回NameNode。
 3. NameNode将接收新的fsimage文件替换旧的，并将edits.new文件更名为edits。
 
 ### HDFS读流程
@@ -222,16 +217,13 @@ SecondaryNameNode职责：定期把NameNode的fsimage和edits下载到本地并�
 ![image-20211210002543711](Hadoop基础.assets/2.png)
 
 1. HDFS客户端通过DistributedFileSystem对象的open()方法打开要读取的文件。
-2. DistributedFileSystem负责向远程的NameNode发起RPC调用，得到文件数据块信息，返回数据块列表。对于每个数据块，NameNode返回该数据块的DataNode地址。这些返回的DN 地址，会按照集群拓扑结构得出 DataNode 与客户端的距离，然后进行排序，排序两个规则：网络拓扑结构中距离 Client 近的排靠前；心跳
-   机制中超时汇报的 DN 状态为 STALE，这样的排靠后；据Client 选取排序靠前的 DataNode 来读取 block，如果客户端本身就是DataNode，那么将从本地直接获取数据(短路读取特性)。
+2. DistributedFileSystem负责向远程的NameNode发起RPC调用，得到文件数据块信息，返回数据块列表。对于每个数据块，NameNode返回该数据块的DataNode地址。这些返回的DN 地址。
 3. DistributedFileSystem返回一个FSDataInputStream对象给客户端，客户端调用FsDataInputStream对象的read()方法开始读取数据。
 4. 通过对数据流反复调用read()方法，把数据从数据节点传输到客户端。
-5. 当一个节点数据读取完毕时，若文件读取还没有结束，客户端再次请求NameNode获取下一批DataNode地址，连接此文件下一个数据块的最近数据节点。读取完一个 block 都会进行 checksum 验证，把客户端读取到本地的块与 HDFS 上的原始块进行校验，如果发现校验结果不一致，说明读取 DataNode 时出现错误，客户端会通知 NameNode，然后再从下一个拥有该 block 副本的 DataNode 继续读。
-6. 当客户端读取完数据时，调用FsDataInputStream对象的close()方法关闭输入流。最终读取来所有的 block 会合并成一个完整的最终文件。
+5. 当一个节点数据读取完毕时，DFSInputStream对象与关闭此数据节点的连接，连接此文件下一个数据块的节点信息。
+6. 当客户端读取完数据时，调用FsDataInputStream对象的close()方法关闭输入流。
 
 ### HDFS写流程
-
-![image-20211209140232908](Hadoop基础.assets/3.png)
 
 1. 客户端调用DistributedFileSystem对象的create()方法创建一个文件输出流对象。
 2. DistributedFileSystem对象向远程的NameNode节点发起RPC调用，NameNode会检查文件是否存在，用户是否有权限新建文件。如果满足条件，则返回给客户端一个可以上传的信息。
@@ -908,9 +900,9 @@ MySQL中提前准备好数据，测试导入到HDFS
   > --m 2
   ```
 
-  ==只要有--query+sql，就需要加$CONDITIONS，哪怕只有一个maptask==。
+  ==只要有--query+sql，就需要加$CONDITIONS，哪怕只有一个maptask。==
 
-  ==如果只有一个maptask，可以不加--split-by来区分数据，因为处理的是整份数据，无需切分==。
+  ==如果只有一个maptask，可以不加--split-by来区分数据，因为处理的是整份数据，无需切分。==
 
   **原理**：
 
