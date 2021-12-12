@@ -531,22 +531,27 @@ hdfs dfsadmin -safemode wait #一直等待直到安全模式结束
 快照顾名思义，就是相当于对我们的 hdfs 文件系统做一个备份，我们可以通过快照对我们指定的文件夹设置备份，但是添加快照之后，并不会立即复制所有文件，而是指向同一个文件。当写入发生时，才会产生新文件
 
 1. 快照使用基本语法
-1、 开启指定目录的快照功能
-hdfs dfsadmin -allowSnapshot 路径
-2、禁用指定目录的快照功能（默认就是禁用状态）
-hdfs dfsadmin -disallowSnapshot 路径
-3、给某个路径创建快照 snapshot
-hdfs dfs -createSnapshot 路径
-4、指定快照名称进行创建快照 snapshot
-hdfs dfs -createSanpshot 路径 名称
-5、给快照重新命名
-hdfs dfs -renameSnapshot 路径 旧名称 新名称
-6、列出当前用户所有可快照目录
-hdfs lsSnapshottableDir
-7、比较两个快照的目录不同之处
-hdfs snapshotDiff 路径 1 路径 2
-8、删除快照 snapshot
-hdfs dfs -deleteSnapshot <path> <snapshotName>
+  1、 开启指定目录的快照功能
+  hdfs dfsadmin -allowSnapshot 路径
+  2、禁用指定目录的快照功能（默认就是禁用状态）
+  hdfs dfsadmin -disallowSnapshot 路径
+  3、给某个路径创建快照 snapshot
+  hdfs dfs -createSnapshot 路径
+  4、指定快照名称进行创建快照 snapshot
+  hdfs dfs -createSanpshot 路径 名称
+  5、给快照重新命名
+  hdfs dfs -renameSnapshot 路径 旧名称 新名称
+  6、列出当前用户所有可快照目录
+  hdfs lsSnapshottableDir
+  7、比较两个快照的目录不同之处
+  hdfs snapshotDiff 路径  快照名称1 快照名称2
+  8、删除快照 snapshot
+  hdfs dfs -deleteSnapshot <path> <snapshotName>
+
+  9、恢复快照 snapshot
+
+  hdfs dfs -cp 快照路径 路径
+
 2. 快照操作实际案例
 1、开启与禁用指定目录的快照
 [root@node01 hadoop-2.6.0-cdh5.14.0]# hdfs dfsadmin -allowSnapshot /user
@@ -623,7 +628,7 @@ Apache 版本的 hadoop 默认使用的是 Capacity Scheduler 调度方式。CDH
 
    ![](Hadoop基础.assets/7.png)
 
-   Capacity Scheduler容量调度是多用户调度器，它以队列为单位划分资源。每个队列可设定一定比例的资源最低保证和使用上限。每个用户也可设置一定的资源使用上限，以防资源滥用。并支持资源共享，将队列剩余资源共享给其他队列使用。
+   Capacity Scheduler容量调度适合多用户调度器，它以队列为单位划分资源。每个队列可设定一定比例的资源最低保证和使用上限。每个用户也可设置一定的资源使用上限，以防资源滥用。并支持资源共享，将队列剩余资源共享给其他队列使用。
 
    在FIFO的基础上，增加多用户支持，最大化集群吞吐量和利用率。它基于一个很朴素的思想：每个用户都可以使用特定量的资源，但集群空闲时，也可以使用整个集群的资源。也就是说，单用户的情况下，和FIFO差不多。
 
@@ -704,4 +709,3 @@ shuffle 是 Mapreduce 的核心，它分布在 Mapreduce 的 map 阶段和 reduc
 # 参考文献
 
 > 《Hadoop大数据技术与应用》杨治明 许桂秋主编
->

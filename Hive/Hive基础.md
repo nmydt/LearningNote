@@ -28,6 +28,22 @@ Hive 主要有四种数据模型(即表)：内部表、外部表、分区表和�
 
 Hive 中的内部表和传统数据库中的表在概念上是类似的，Hive 的每个表都有自己的存储目录，除了外部表外，所有的表数据都存放在配置在 hive-site.xml 文件的${hive.metastore.warehouse.dir}/table_name 目录下。
 
+**加载数据到内部表**：
+
+ 导入HDFS数据 (源文件移动到仓库目录，默认在/user/hive/warehouse目录中)       
+
+```sql
+LOAD DATA INPATH '/scott/emp.csv' INTO TABLE emp;      
+```
+
+导入本地Linux的数据：（源文件不移动）    
+
+```sql
+LOAD DATA LOCAL INPATH '/home/hadoop/emp' INTO TABLE emp;         
+```
+
+注意：只有源和目标文件在同一个文件系统中移动才会删除源文件。
+
 **创建内部表：**
 
 ```sql
@@ -72,6 +88,20 @@ PARTITIONED BY (ds STRING,country STRING)
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY ','
 STORE AS SEQUENCEFILE;
+```
+
+**查看分区的具体情况：**
+
+```sql
+hdfs dfs -ls  路径 
+## 或者使用HiveQL
+show partitions 表名
+```
+
+**向分区表中插入数据：**
+
+```sql
+insert into table 表名 partition(country="zh") select ....from 表名 where 条件
 ```
 
 ### Hive 分桶表
