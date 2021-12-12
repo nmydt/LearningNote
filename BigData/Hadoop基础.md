@@ -637,7 +637,7 @@ Apache 版本的 hadoop 默认使用的是 Capacity Scheduler 调度方式。CDH
 
 ## 5.1 MapReduce概述
 
-MapReduce是一种简化的并行计算模型，MapReduce也就是“分而治之，汇总结果”。
+MapReduce是一种简化的并行计算模型，MapReduce也就是“==分而治之，汇总结果==”。
 
 #### MapReduce特点
 
