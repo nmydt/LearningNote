@@ -42,7 +42,7 @@ Hadoop3.x：与Hadoop2.x相比
    | 2.x端口 | 3.x端口 | name                                 | desc                                                 |
    | ------- | ------- | ------------------------------------ | ---------------------------------------------------- |
    | 50091   | 9869    | dfs.namenode.secondary.https-address | The secondary namenode HTTPS server address and port |
-   | 50090   | 9868    | dfs.namenode.secondary.http-address  | The secondary namenode HTTPS server address and port |
+   | 50090   | 9868    | dfs.namenode.secondary.http-address  | The secondary namenode HTTP server address and port  |
 
    * * *
 
@@ -57,9 +57,9 @@ Hadoop3.x：与Hadoop2.x相比
 
    **Yarn 端口**
 
-   | 2.x端口 | 3.x端口 | name                                | desc         |
-   | ------- | ------- | ----------------------------------- | ------------ |
-   |         | 8088    | yarn.resourcemanager.webapp.address | http服务端口 |
+   | 2.x端口 | 3.x端口 | name                                | desc                          |
+   | ------- | ------- | ----------------------------------- | ----------------------------- |
+   |         | 8088    | yarn.resourcemanager.webapp.address | ResourceManager对外web ui地址 |
 
    * * *
 
@@ -87,10 +87,14 @@ Hadoop3.x：与Hadoop2.x相比
 
 ### 机架感知
 
-定义：机架感知是一种计算不同计算节点的距离的技术，运行任务的时候尽量减少网络带宽的资源消耗。副本存储策略为：数据文件默认在 HDFS 上存放三份, 本地一份，同机架内其它某一节点上一份, 不同机架的某一节点上一份。
+定义：在大型 Hadoop 集群中，有多个机架。每个机架由 DataNode 组成。与驻留在不同机架上的 DataNode 之间的通信相比，同一机架上的 DataNode 之间的通信效率更高。
+
+为了减少文件**读/写**期间的网络流量，NameNode 选择最近的 DataNode 来为客户端读/写请求提供服务。NameNode 维护每个 DataNode 的**机架 id**以获取此机架信息。这种根据机架信息选择最近的 DataNode 的概念称为**机架感知**。
+
+副本存储策略为：数据文件默认在 HDFS 上存放三份, 本地一份，同机架内其它某一节点上一份, 不同机架的某一节点上一份。
 
 - 高可靠性，高可用性(一个机架或节点不能用了，其他机架中的节点仍然保存着数据)
-- 提高IO利用率(机架内的机器之间的网络速度通常都会高于跨机架机器之间的网络速度，并且机架之间机器的网络通信通常受到上层交换机间网络带宽的限制。所以数据块只存放在两个不同的机架上，此策略减少了读取数据时需要的网络传输总带宽(两条车道和三条车道的区别)。
+- 提高网络IO利用率(机架内的机器之间的网络速度通常都会高于跨机架机器之间的网络速度，并且机架之间机器的网络通信通常受到上层交换机间网络带宽的限制。所以数据块只存放在两个不同的机架上，而不是三个机架上，此策略减少了读取数据时需要的网络传输总带宽(两条车道和三条车道的区别)）。
 
 ### Hadoop生态圈组件及其功能
 
@@ -1080,6 +1084,8 @@ sqoop命令执行导出。
 ## 参考文献
 
 > 《Hadoop大数据技术与应用》杨治明 许桂秋主编
+>
+> 《Rack Awareness in Hadoop HDFS – An Introductory Guide》 https://data-flair.training/blogs/rack-awareness-hadoop-hdfs/
 >
 > 《HBase过滤器入门教程》http://c.biancheng.net/view/6522.html
 >
