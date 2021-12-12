@@ -548,9 +548,11 @@ hdfs dfs -renameSnapshot 路径 旧名称 新名称
 6、列出当前用户所有可快照目录
 hdfs lsSnapshottableDir
 7、比较两个快照的目录不同之处
-hdfs snapshotDiff 路径 1 路径 2
+hdfs snapshotDiff 路径 1名称1 路径 2名称2
 8、删除快照 snapshot
 hdfs dfs -deleteSnapshot <path> <snapshotName>
+9.恢复快照
+ hdfs dfs -cp 快照路径 路径
 2. 快照操作实际案例
 1、开启与禁用指定目录的快照
 [root@node01 hadoop-2.6.0-cdh5.14.0]# hdfs dfsadmin -allowSnapshot /user
@@ -629,7 +631,7 @@ Apache 版本的 hadoop 默认使用的是 Capacity Scheduler 调度方式。CDH
 
    ![](Hadoop基础.assets/7.png)
 
-   Capacity Scheduler容量调度是多用户调度器，它以队列为单位划分资源。每个队列可设定一定比例的资源最低保证和使用上限。每个用户也可设置一定的资源使用上限，以防资源滥用。并支持资源共享，将队列剩余资源共享给其他队列使用。
+   Capacity Scheduler容量调度适合是多用户调度器，它以队列为单位划分资源。每个队列可设定一定比例的资源最低保证和使用上限。每个用户也可设置一定的资源使用上限，以防资源滥用。并支持资源共享，将队列剩余资源共享给其他队列使用。
 
    在FIFO的基础上，增加多用户支持，最大化集群吞吐量和利用率。它基于一个很朴素的思想：每个用户都可以使用特定量的资源，但集群空闲时，也可以使用整个集群的资源。也就是说，单用户的情况下，和FIFO差不多。
 
@@ -724,7 +726,7 @@ STRING，TIMESTAMP(V0.8.0+)和 BINARY(V0.8.0+)。
 Hive 的集合类型有：STRUCT，MAP 和 ARRAY。
 
 Hive支持的存储数据的格式主要有： TEXTFILE 文本格式文件（行式存储）、 SEQUENCEFILE 二进制序列化文件(行式存储)、ORC（列式存储）、PARQUET（列式存储）、Avro（不是列存储，是一个数据序列化系统）等。
-
+hive的数据类型：数值型，日期型，字符型，其他
 ### Hive的数据模型
 
 Hive 主要有四种数据模型(即表)：内部表、外部表、分区表和桶表。
@@ -746,7 +748,10 @@ ROW FORMAT DELIMITED
 FIELDS TERMINATED BY ','
 STORE AS TEXTFILE;
 ```
-
+导入HDFS数据
+  LOAD DATA INPATH  HADOOP路径 INTO TABLE 表;
+导入本地Linux的数据：
+  LOAD DATA LOCAL INPATH LINUX 路径 INTO TABLE 表;
 #### Hive 外部表
 
 被 external 修饰的为外部表（external table），外部表指向已经存在在 HadoopHDFS 上的数据，除了在删除外部表时只删除元数据而不会删除表数据外，其他和内部表很像。
@@ -781,6 +786,10 @@ ROW FORMAT DELIMITED
 FIELDS TERMINATED BY ','
 STORE AS SEQUENCEFILE;
 ```
+查看分区的具体情况：
+   hdfs dfs -ls  路径
+向分区表中插入数据：
+  insert into table 表名 partition(deptno=10) select ....from 表名 where 条件
 
 #### Hive 分桶表
 桶表就是对指定列进行哈希(hash)计算，然后会根据 hash 值进行切分数据，将
