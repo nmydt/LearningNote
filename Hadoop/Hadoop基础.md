@@ -57,7 +57,7 @@ Hadoop3.x：与Hadoop2.x相比
 
    | 2.x端口 | 3.x端口 | name                                | desc         |
    | ------- | ------- | ----------------------------------- | ------------ |
-   | 8080    | 8088    | yarn.resourcemanager.webapp.address | http服务端口 |
+   | 8088    | 8088    | yarn.resourcemanager.webapp.address | http服务端口 |
 
    * * *
 
