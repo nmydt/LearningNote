@@ -720,7 +720,7 @@ MongoDB 的索引是基于 [B-tree](https://zh.wikipedia.org/wiki/B%E6%A0%91)数
 
 
 
-![img](MongoDB基础.assets\1.gif)
+![img](MongoDB基础.assets/1.gif)
 
 
 从根本上说，MongoDB 中的索引与其他数据库系统中的索引类似。MongoDB 在集合级别定义索引，并支持 MongoDB 集合中文档的任何字段或子字段的索引。
@@ -739,7 +739,7 @@ MongoDB 支持文档集合中任何字段的索引，在默认情况下，所有
 
 
 
-![img](MongoDB基础.assets\2.gif)
+![img](MongoDB基础.assets/2.gif)
 
 
 对于单字段索引和排序操作，索引键的排序顺序（即升序或降序）无关紧要，因为 MongoDB 可以在任意方向上遍历索引。
@@ -772,7 +772,7 @@ MongoDB 支持复合索引，其中复合索引结构包含多个字段，下图
 
 
 
-![img](MongoDB基础.assets\3.gif)
+![img](MongoDB基础.assets/3.gif)
 
 
 复合索引可以支持在多个字段上进行的匹配查询，语法结构如下：
@@ -800,7 +800,7 @@ db.collection.createIndex ({ <key1> : <type>, <key2> : <type2>, ...})
 
 
 
-![img](MongoDB基础.assets\4.gif)
+![img](MongoDB基础.assets/4.gif)
 
 创建多键值索引的语法如下：
 
@@ -896,7 +896,7 @@ MongoDB 的聚合框架就是将文档输入处理管道，在管道内完成对
 
 
 
-![img](MongoDB基础.assets\5.gif)
+![img](MongoDB基础.assets/5.gif)
 
 
 上图的聚合操作相当于 MySQL中的以下语句：
