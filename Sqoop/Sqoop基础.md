@@ -228,6 +228,6 @@ sqoop命令执行导出。
 
 如果想提高效率和进行更多控制，可以直接Java API的方式，从hbase中读出数据，导出到mysql。
 
-## 参考文献
+# 参考文献
 
 > 《sqoop使用入门》https://www.cnblogs.com/youngchaolin/p/12253859.html#_label2_0
