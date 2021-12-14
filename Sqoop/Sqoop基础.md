@@ -1,12 +1,10 @@
-# Sqoop
-
-## Sqoop简介
+# 第一章 Sqoop简介
 
 Sqoop是一个在关系型数据库与Hadoop平台之间进行数据互导的工具。
 
-## Mysql与Hadoop平台互导
+# 第二章 Mysql与Hadoop平台互导
 
-### MySQL导入HDFS
+## 1.1 MySQL导入HDFS
 
 MySQL中提前准备好数据，测试导入到HDFS
 
@@ -75,7 +73,7 @@ MySQL中提前准备好数据，测试导入到HDFS
 
   ![](Sqoop基础.assets\1.png)
 
-### MySQL导入到Hive
+## 1.2MySQL导入到Hive
 
 导出数据到hive前，需要将hive中的一个包(hive-exec-1.1.0-cdh5.14.2.jar)拷贝到sqoop的lib目录。
 
@@ -143,7 +141,7 @@ person
 
 
 
-### MySQL导入数据到HBase
+## 1.3 MySQL导入数据到HBase
 
 也可以将数据导入到hbase，依然使用sqooptest.Person表，导入前集群需启动zookeeper和hbase。
 
@@ -164,7 +162,7 @@ person
 
 导出数据 
 
-### 从HDFS导出到MySQL
+## 1.4 从HDFS导出到MySQL
 
 hdfs中先准备数据
 
@@ -206,7 +204,7 @@ sqoop命令执行导出。
 > --input-fields-terminated-by " " # 指定文件数据的分隔符
 ```
 
-### 从Hive导出到MySQL
+## 1.5 从Hive导出到MySQL
 
 ```sh
 [hadoop@node01 ~]$ sqoop export \
@@ -218,7 +216,7 @@ sqoop命令执行导出。
 > --input-fields-terminated-by " " # 指定文件数据的分隔符
 ```
 
-### 从HBase导出到MySQL
+## 1.6 从HBase导出到MySQL
 
 默认的没有命令直接将hbase中的数据导入到MySQL，因为在hbase中的表数据量通常比较大，如果一次性导入到MySQL，可能导致MySQL直接崩溃。
 
