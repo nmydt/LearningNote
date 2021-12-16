@@ -590,6 +590,8 @@ Region 拆分是 HBase 能够拥有良好扩展性的最重要因素。一旦 Re
 4. 从 Meta 表删除被合并的 Region 元数据，新的合并了的 Region 的元数据被更新写入 Meta 表中。
 5. 合并的 Region 被设置为上线状态并接受访问，同时更新 Region 信息到 Master。
 
-## 参考文献
+# 参考文献
 
 > 《HBase过滤器入门教程》http://c.biancheng.net/view/6522.html
+>
+> 《NoSQL数据库原理与应用》王爱国 许桂秋主编
