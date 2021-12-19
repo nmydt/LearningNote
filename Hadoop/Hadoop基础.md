@@ -223,25 +223,24 @@ SecondaryNameNode职责：定期把NameNode的fsimage和edits下载到本地并�
 
 ![image-20211210002543711](Hadoop基础.assets/2.png)
 
-1. HDFS客户端通过DistributedFileSystem对象的open()方法打开要读取的文件。
-2. DistributedFileSystem负责向远程的NameNode发起RPC调用，得到文件数据块信息，返回数据块列表。对于每个数据块，NameNode返回该数据块的DataNode地址。这些返回的DN 地址，会按照集群拓扑结构得出 DataNode 与客户端的距离，然后进行排序，排序两个规则：网络拓扑结构中距离 Client 近的排靠前；心跳
-   机制中超时汇报的 DN 状态为 STALE，这样的排靠后；据Client 选取排序靠前的 DataNode 来读取 block，如果客户端本身就是DataNode，那么将从本地直接获取数据(短路读取特性)。
-3. DistributedFileSystem返回一个FSDataInputStream对象给客户端，客户端调用FsDataInputStream对象的read()方法开始读取数据。
+1. HDFS客户端通过`DistributedFileSystem`对象的open()方法打开要读取的文件。
+2. 该对象负责向远程的NameNode发起RPC调用，得到文件数据块信息，返回数据块列表。对于每个数据块，NameNode返回该数据块的DataNode地址。这些返回的DN 地址，会按照集群拓扑结构得出 DataNode 与客户端的距离，然后进行排序，排序两个规则：网络拓扑结构中距离 Client 近的排靠前；心跳机制中超时汇报的 DN 状态为 STALE，这样的排靠后；据Client 选取排序靠前的 DataNode 来读取 block，如果客户端本身就是DataNode，那么将从本地直接获取数据(短路读取特性)。
+3. 一旦收到 DataNode 的地址，该对象就会返回给客户端`FSDataInputStream`类型的对象`FSDataInputStream`包含`DFSInputStream`，`DFSInputStream`对象负责与 DataNode 和 NameNode 的交互。客户端调用`FSDataInputStream`对象的`read()`方法，该方法使`DFSInputStream`与文件的第一个块的第一个 DataNode 建立连接。
 4. 通过对数据流反复调用read()方法，把数据从数据节点传输到客户端。
-5. 当一个节点数据读取完毕时，若文件读取还没有结束，客户端再次请求NameNode获取下一批DataNode地址，连接此文件下一个数据块的最近数据节点。读取完一个 block 都会进行 checksum 验证，把客户端读取到本地的块与 HDFS 上的原始块进行校验，如果发现校验结果不一致，说明读取 DataNode 时出现错误，客户端会通知 NameNode，然后再从下一个拥有该 block 副本的 DataNode 继续读。
-6. 当客户端读取完数据时，调用FsDataInputStream对象的close()方法关闭输入流。最终读取来所有的 block 会合并成一个完整的最终文件。
+5. 当一个block数据读取完毕时，`DFSInputStream `关闭连接并继续定位下一个块的下一个 DataNode。读取完一个 block 都会进行 checksum 验证，把客户端读取到本地的块与 HDFS 上的原始块进行校验，如果发现校验结果不一致，说明读取 DataNode 时出现错误，客户端会通知 NameNode，然后再从下一个拥有该 block 副本的 DataNode 继续读。
+6. 一旦客户端完成读取，调用`FSDataInputStream`对象的`close()`方法关闭输入流。最终读取来所有的 block 会合并成一个完整的最终文件。
 
 ### 3.2.5 HDFS写流程
 
 ![image-20211209140232908](Hadoop基础.assets/3.png)
 
-1. 客户端调用DistributedFileSystem对象的create()方法创建一个文件输出流对象。
-2. DistributedFileSystem对象向远程的NameNode节点发起RPC调用，NameNode会检查文件是否存在，用户是否有权限新建文件。如果满足条件，则返回给客户端一个可以上传的信息。
+1. 客户端调用`DistributedFileSystem`对象的`create()`方法创建一个文件输出流对象。
+2. `DistributedFileSystem`对象向远程的NameNode节点发起RPC调用，NameNode会检查文件是否存在，用户是否有权限新建文件。如果满足条件，则返回给客户端一个可以上传的信息。
 3. 客户端根据文件的大小进行切分，默认 128M 一块，切分完成之后给NameNode 发送请求第一个 block 块上传到哪些服务器上；NameNode 收到请求之后，根据网络拓扑和机架感知以及副本机制进行文件分配，返回可用的一组数据节点；
-4. 客户端调用FsDataOutputStream对象的write()方法写数据，数据先被写入缓冲区，再被切分成一个一个数据包。
+4. 一旦收到 DataNode 的地址，该对象就会返回给客户端`FSDataOutputStream`类型的对象，客户端调用`FsDataOutputStream`对象的`write()`方法写数据，该方法使`DFSOutputStream`与文件的第一个块的第一个 DataNode 建立连接。数据先被写入缓冲区，再被切分成一个一个数据包。
 5. 每个数据包被发送到由NameNode节点分配的一组数据节点的一个节点上，在这组数据节点组成的管道上依次传输数据包。
 6. 管道上的数据节点反向返回确认信息，最终由管道的第一个数据节点将整条管道的确认信息发送给客户端。
-7. 当一个block传输完成之后, 客户端再次请求NameNode上传第二个block，NameNode 重新选择可用的一组数据节点给 客户端。最后客户端完成写入，调用close()方法关闭文件输出流。
+7. 当一个block传输完成之后, `DFSOutputStream `关闭连接。客户端再次请求NameNode上传第二个block，NameNode 重新选择可用的一组数据节点给 客户端。最后客户端完成写入，调用`FsDataOutputStream`对象的close()方法关闭文件输出流。
 
 ## 3.3 数据容错
 
@@ -256,8 +255,6 @@ DataNode 去复制副本，并将挂掉的 DataNode 作下线处理，不再让�
 **正常情况下DataNode出错怎么办**
 
 每个DataNode都会定期向NameNode发送心跳信号，由于网络割裂等原因导致NameNode无法联系到DataNode，NameNode通过心跳信号的缺失来检测这一情况，并将其标志为宕机，不会再将新的I/O请求发送给它们。NameNode不断检测数据块的状态，一旦发现数据块数量小于设定值，就启动复制操作。
-
-
 
 ### NameNode出错
 
@@ -531,22 +528,22 @@ hdfs dfsadmin -safemode wait #一直等待直到安全模式结束
 快照顾名思义，就是相当于对我们的 hdfs 文件系统做一个备份，我们可以通过快照对我们指定的文件夹设置备份，但是添加快照之后，并不会立即复制所有文件，而是指向同一个文件。当写入发生时，才会产生新文件
 
 1. 快照使用基本语法
-  1、 开启指定目录的快照功能
-  hdfs dfsadmin -allowSnapshot 路径
-  2、禁用指定目录的快照功能（默认就是禁用状态）
-  hdfs dfsadmin -disallowSnapshot 路径
-  3、给某个路径创建快照 snapshot
-  hdfs dfs -createSnapshot 路径
-  4、指定快照名称进行创建快照 snapshot
-  hdfs dfs -createSanpshot 路径 名称
-  5、给快照重新命名
-  hdfs dfs -renameSnapshot 路径 旧名称 新名称
-  6、列出当前用户所有可快照目录
-  hdfs lsSnapshottableDir
-  7、比较两个快照的目录不同之处
-  hdfs snapshotDiff 路径  快照名称1 快照名称2
-  8、删除快照 snapshot
-  hdfs dfs -deleteSnapshot <path> <snapshotName>
+    1、 开启指定目录的快照功能
+    hdfs dfsadmin -allowSnapshot 路径
+    2、禁用指定目录的快照功能（默认就是禁用状态）
+    hdfs dfsadmin -disallowSnapshot 路径
+    3、给某个路径创建快照 snapshot
+    hdfs dfs -createSnapshot 路径
+    4、指定快照名称进行创建快照 snapshot
+    hdfs dfs -createSanpshot 路径 名称
+    5、给快照重新命名
+    hdfs dfs -renameSnapshot 路径 旧名称 新名称
+    6、列出当前用户所有可快照目录
+    hdfs lsSnapshottableDir
+    7、比较两个快照的目录不同之处
+    hdfs snapshotDiff 路径  快照名称1 快照名称2
+    8、删除快照 snapshot
+    hdfs dfs -deleteSnapshot <path> <snapshotName>
 
   9、恢复快照 snapshot
 
