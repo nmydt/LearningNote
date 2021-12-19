@@ -101,9 +101,11 @@ QJM 共享存储的基本思想来自于 Paxos 算法，采用多个称为 Journ
 
 1. 首先尝试调用这个旧 Active NameNode 的 HAServiceProtocol RPC 接口的 transitionToStandby 方法，看能不能把它转换为 Standby 状态。
 2. 如果 transitionToStandby 方法调用失败，那么就执行 Hadoop 配置文件之中预定义的隔离措施，Hadoop 目前主要提供两种隔离措施，通常会选择 sshfence
-- sshfence：通过 SSH 登录到目标机器上，执行命令 fuser 将对应的进程杀
-  死；
-- shellfence：执行一个用户自定义的 shell 脚本来将对应的进程隔离。
+
+   - sshfence：通过 SSH 登录到目标机器上，执行命令 fuser 将对应的进程杀
+     死；
+
+   - shellfence：执行一个用户自定义的 shell 脚本来将对应的进程隔离。
 
 ## 1.8 小文件过多会有什么危害，如何避免
 
@@ -113,27 +115,33 @@ Hadoop 上大量 HDFS 元数据信息存储在 NameNode 内存中,因此过多�
 ## 1.9 请说下 HDFS 的组织架构
 
 1. Client：客户端
-  - 切分文件。文件上传 HDFS 的时候，Client 将文件切分成一个一个
-  的 Block，然后进行存储。
-  - 与 NameNode 交互，获取文件的位置信息。
-  - 与 DataNode 交互，读取或者写入数据。
-  - Client 提供一些命令来管理 HDFS，比如启动关闭 HDFS、访问 HDFS
-  目录及内容等。
+
+     - 切分文件。文件上传 HDFS 的时候，Client 将文件切分成一个一个
+       的 Block，然后进行存储。
+     - 与 NameNode 交互，获取文件的位置信息。
+     - 与 DataNode 交互，读取或者写入数据。
+     - Client 提供一些命令来管理 HDFS，比如启动关闭 HDFS、访问 HDFS
+       目录及内容等。
 2. NameNode：名称节点，也称主节点，存储数据的元数据信息，不存储具体
-  的数据
-  - 管理 HDFS 的名称空间。
-  - 管理数据块（Block）映射信息。
-  - 配置副本策略。
-  - 处理客户端读写请求。
+    的数据
+    
+      - 管理 HDFS 的名称空间。
+      - 管理数据块（Block）映射信息。
+      - 配置副本策略。
+      - 处理客户端读写请求。
 3. DataNode：数据节点，也称从节点。NameNode 下达命令，DataNode 执行
-  实际的操作
-  - 存储实际的数据块。
-  - 执行数据块的读/写操作。
+    实际的操作
+    
+      - 存储实际的数据块。
+      - 执行数据块的读/写操作。
 4. Secondary NameNode：并非 NameNode 的热备。当 NameNode 挂掉的时候，
-它并不能马上替换 NameNode 并提供服务
-- 辅助 NameNode，分担其工作量。
-- 定期合并 Fsimage 和 Edits，并推送给 NameNode。
-- 在紧急情况下，可辅助恢复 NameNode。
+  它并不能马上替换 NameNode 并提供服务
+
+  - 辅助 NameNode，分担其工作量。
+
+  - 定期合并 Fsimage 和 Edits，并推送给 NameNode。
+
+  - 在紧急情况下，可辅助恢复 NameNode。
 
 # 第二章 MapReduce
 
@@ -155,8 +163,13 @@ inputFile 通过 split 被切割为多个 split 文件，通过 Record 按行读
 ## 2.2 请说下 MR 中 Reduce Task 的工作机制
 
 简单描述：
-Reduce 大致分为 copy、sort、reduce 三个阶段，重点在前两个阶段。copy 阶段包含一个 eventFetcher 来获取已完成的 map 列表，由 Fetcher 线程去 copy 数据，在此过程中会启动两个 merge 线程，分别为 inMemoryMerger和 onDiskMerger，分别将内存中的数据 merge 到磁盘和将磁盘中的数据进行merge。待数据 copy 完成之后，copy 阶段就完成了。开始进行 sort 阶段，sort 阶段主要是执行 finalMerge 操作，纯粹的 sort 阶段，完成之后就是 reduce 阶段，调用用户定义的 reduce 函数进行处理。
+Reduce 大致分为 copy、sort、reduce 三个阶段，重点在前两个阶段。
+
+copy 阶段包含一个 eventFetcher 来获取已完成的 map 列表，由 Fetcher 线程去 copy 数据，在此过程中会启动两个 merge 线程，分别为 inMemoryMerger和 onDiskMerger，分别将内存中的数据 merge 到磁盘和将磁盘中的数据进行merge。待数据 copy 完成之后，copy 阶段就完成了。
+
+开始进行 sort 阶段，sort 阶段主要是执行 finalMerge 操作，纯粹的 sort 阶段，完成之后就是 reduce 阶段，调用用户定义的 reduce 函数进行处理。
 详细步骤：
+
 1. Copy 阶段：简单地拉取数据。Reduce 进程启动一些数据 copy 线程(Fetcher)，通过 HTTP 方式请求 maptask 获取属于自己的文件（map task的分区会标识每个 map task 属于哪个 reduce task ，默认 reduce task的标识从 0 开始）。
 2. Merge 阶段：在远程拷贝数据的同时，ReduceTask 启动了两个后台线程对内存和磁盘上的文件进行合并，以防止内存使用过多或磁盘上文件过多。merge 有三种形式：内存到内存；内存到磁盘；磁盘到磁盘。默认情况下第一种形式不启用。当内存中的数据量到达一定阈值，就直接启动内存到磁盘的 merge。与 map 端类似，这也是溢写的过程，这个过程中如果你设置有 Combiner，也是会启用的，然后在磁盘中生成了众多的溢写文件。内存到磁盘的 merge 方式一直在运行，直到没有 map 端的数据时才结束，然后启动第三种磁盘到磁盘的 merge 方式生成最终的文件。
 3. 合并排序：把分散的数据合并成一个大的数据后，还会再对合并后的数据排序。
@@ -247,5 +260,7 @@ Apache 版本的 hadoop 默认使用的是 Capacity Scheduler 调度方式。CDH
 
    ![](Hadoop面试.assets/6.png)
 
-   Fair 调度器是一个队列资源分配方式，会为所有运行的 job 动态的调整系统资源。当集群只有一个任务时，此任务会占用集群的全部资源，当其他的任务提交后，那些释放的资源会被分配给新的任务，所以每个任务最终都能获得几乎一样多的资源。
+   在 Fair 调度器中，我们不需要预先占用一定的系统资源，Fair 调度器会为所有运行的 job 动态的调整系统资源。
+   
+   比如：当第一个大 job 提交时，只有这一个 job 在运行，此时它获得了所有集群资源；当第二个小任务提交后，Fair 调度器会分配一半资源给这个小任务，让这两个任务公平的共享集群资源。
 
