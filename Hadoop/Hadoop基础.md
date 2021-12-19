@@ -708,3 +708,5 @@ shuffle 是 Mapreduce 的核心，它分布在 Mapreduce 的 map 阶段和 reduc
 > 《Hadoop大数据技术与应用》杨治明 许桂秋主编
 >
 > 《Rack Awareness in Hadoop HDFS – An Introductory Guide》 https://data-flair.training/blogs/rack-awareness-hadoop-hdfs/
+>
+> 《HDFS Tutorial: Architecture, Read & Write Operation using Java API》https://www.guru99.com/learn-hdfs-a-beginners-guide.html
