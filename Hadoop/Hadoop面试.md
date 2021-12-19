@@ -4,6 +4,8 @@
 
 ### HDFS读流程
 
+
+
 ![image-20211210002543711](Hadoop面试.assets/1.png)
 
 1. HDFS客户端通过`DistributedFileSystem`对象的open()方法打开要读取的文件。
@@ -135,7 +137,7 @@ Hadoop 上大量 HDFS 元数据信息存储在 NameNode 内存中,因此过多�
       - 存储实际的数据块。
       - 执行数据块的读/写操作。
 4. Secondary NameNode：并非 NameNode 的热备。当 NameNode 挂掉的时候，
-  它并不能马上替换 NameNode 并提供服务
+    它并不能马上替换 NameNode 并提供服务
 
   - 辅助 NameNode，分担其工作量。
 
