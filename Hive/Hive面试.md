@@ -113,8 +113,8 @@ sort by 不是全局排序，其在数据进入 reducer 前完成排序。
 
 # 10. Hive 小文件过多怎么解决
 
-1. **使用 hive 自带的 concatenate 命令，自动合并小文件**
-  使用方法：
+## 10.1 使用 hive 自带的 concatenate 命令，自动合并小文件
+使用方法：
 
   ```sql
   #对于非分区表
@@ -128,82 +128,80 @@ sort by 不是全局排序，其在数据进入 reducer 前完成排序。
   2、使用 concatenate 命令合并小文件时不能指定合并后的文件数量，但可以多次执行该命令。
   3、当多次使用 concatenate 后文件数量不在变化，这个跟参数mapreduce.input.fileinputformat.split.minsize=256mb 的设置有关，可设定每个文件的最小 size。
 
-2. **调整参数减少 Map 数量**
-  设置 map 输入合并小文件的相关参数（执行 Map 前进行小文件合并）：
+## 10.2 调整参数减少 Map 数量
+设置 map 输入合并小文件的相关参数（执行 Map 前进行小文件合并）：
 
-  1. 在 mapper 中将多个文件合成一个 split 作为输入（CombineHiveInputFormat 底层是 Hadoop 的 CombineFileInputFormat 方法）：
+1. 在 mapper 中将多个文件合成一个 split 作为输入（CombineHiveInputFormat 底层是 Hadoop 的CombineFileInputFormat 方法）：
 
-  ```sql
-  set hive.input.format=org.apache.hadoop.hive.ql.io.CombineHiveInputFormat; -- 默认
-  ```
+      ```sql
+      set hive.input.format=org.apache.hadoop.hive.ql.io.CombineHiveInputFormat; -- 默认
+      ```
 
   2. 每个 Map 最大输入大小（这个值决定了合并后文件的数量）：
 
-  ```sql
-  set mapred.max.split.size=256000000; -- 256M 
-  ```
+      ```sql
+      set mapred.max.split.size=256000000; -- 256M 
+      ```
 
   3. 一个节点上 split 的至少大小（这个值决定了多个 DataNode 上的文件是否需要合并）：
 
-  ```sql
-  set mapred.min.split.size.per.node=100000000; -- 100M 
-  ```
+      ```sql
+      set mapred.min.split.size.per.node=100000000; -- 100M 
+      ```
 
   4. 一个交换机下 split 的至少大小(这个值决定了多个交换机上的文件是否需要合并)：
 
-  ```sql
-  set mapred.min.split.size.per.rack=100000000; -- 100M
-  ```
+      ```sql
+      set mapred.min.split.size.per.rack=100000000; -- 100M
+      ```
 
-  
-
-3. **减少 Reduce 的数量**
-  reduce 的个数决定了输出的文件的个数，所以可以调整 reduce 的个数控制 hive表的文件数量。
+## 10.3 减少 Reduce 的数量
+reduce 的个数决定了输出的文件的个数，所以可以调整 reduce 的个数控制 hive表的文件数量。
   hive 中的分区函数 distribute by 正好是控制 MR 中 partition 分区的，可以通过设置 reduce 的数量，结合分区函数让数据均衡的进入每个 reduce 即可：
 
-  1. 设置 reduce 的数量有两种方式，第一种是直接设置 reduce 个数
+1. 设置 reduce 的数量有两种方式，第一种是直接设置 reduce 个数
 
-  ```sql
-  set mapreduce.job.reduces=10;
-  ```
+      ```sql
+      set mapreduce.job.reduces=10;
+      ```
 
   2. 第二种是设置每个 reduce 的大小，Hive 会根据数据总大小猜测确定一个 reduce 个数
 
-  ```sql
-  set hive.exec.reducers.bytes.per.reducer=5120000000; -- 默认是 1G，设置为 5G
-  ```
+      ```sql
+      set hive.exec.reducers.bytes.per.reducer=5120000000; -- 默认是 1G，设置为 5G
+      ```
 
   3. 执行以下语句，将数据均衡的分配到 reduce 中
 
-  ```sql
-  set mapreduce.job.reduces=10;
-  insert overwrite table A partition(dt)
-  select * from B
-  distribute by rand();
-  ```
+      ```sql
+      set mapreduce.job.reduces=10;
+      insert overwrite table A partition(dt)
+      select * from B
+      distribute by rand();
+      ```
 
   ​	对于上述语句解释：如设置 reduce 数量为 10，使用 rand()， 随机生成一个数x % 10 ， 这样数据就会随机进入 reduce 中，防止出现有的文件过大或过小。
 
-4. **使用 hadoop 的 archive 将小文件归档**
-  Hadoop Archive 简称 HAR，是一个高效地将小文件放入 HDFS 块中的文件存档工具，它能够将多个小文件打包成一个 HAR 文件，这样在减少 namenode 内存使用的同时，仍然允许对文件进行透明的访问。
+## 10.4 使用 hadoop 的 archive 将小文件归档
+Hadoop Archive 简称 HAR，是一个高效地将小文件放入 HDFS 块中的文件存档工具，它能够将多个小文件打包成一个 HAR 文件，这样在减少 namenode 内存使用的同时，仍然允许对文件进行透明的访问。
 
-  1. 用来控制归档是否可用
+1. 用来控制归档是否可用
 
-     ```sql
-     set hive.archive.enabled=true;
-     ```
+    ```sql
+    set hive.archive.enabled=true;
+    ```
 
-  2. 通知 Hive 在创建归档时是否可以设置父目录
+2. 通知 Hive 在创建归档时是否可以设置父目录
 
-     ```sql
-     set hive.archive.har.parentdir.settable=true;
-     ```
+    ```sql
+    set hive.archive.har.parentdir.settable=true;
+    ```
 
-  3. 控制需要归档文件的大小
+3. 控制需要归档文件的大小
 
-     ```sql
-     set har.partfile.size=1099511627776;
-     ```
+    ```sql
+    set har.partfile.size=1099511627776;
+    ```
 
   4. 使用以下命令进行归档：
 
@@ -216,8 +214,6 @@ sort by 不是全局排序，其在数据进入 reducer 前完成排序。
      ```sql
      ALTER TABLE A UNARCHIVE PARTITION(dt='2021-05-07', hr='12');
      ```
-
-  **注意**：归档的分区可以查看不能 insert overwrite，必须先 unarchive
 
 # 11. Hive 优化有哪些
 
