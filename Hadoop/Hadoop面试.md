@@ -4,8 +4,6 @@
 
 ### HDFS读流程
 
-
-
 ![image-20211210002543711](Hadoop面试.assets/1.png)
 
 1. HDFS客户端通过`DistributedFileSystem`对象的open()方法打开要读取的文件。

@@ -208,7 +208,7 @@ sqoop命令执行导出。
 
 ```sh
 [hadoop@node01 ~]$ sqoop export \
-> --connect jdbc:mysql://node01:3306/sqooptest \
+> --connect 'jdbc:mysql://node01:3306/sqooptest?useUnicode=true&characterEncoding=utf-8' \
 > --username root \
 > --password 123456 \
 > --table hdfstomysql \  # 提前建立好的表
