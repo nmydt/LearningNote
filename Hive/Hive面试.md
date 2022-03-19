@@ -1,4 +1,11 @@
-# 1. hive 内部表和外部表的区别
+# 1. Hive架构
+
+![](Hive面试.assets/Hive架构.png)
+
+Hive通过给用户提供的一系列交互接口，接收到用户的指令(SQL)，使用自己的Driver，结合元数据(MetaStore)，将这些指令翻译成MapReduce，提交到Hadoop中执行。
+最后，将执行返回的结果输出到用户交互接口。
+
+# 1. Hive 内部表和外部表的区别
 
 未被 external 修饰的是内部表，被 external 修饰的为外部表。
 区别：
@@ -230,3 +237,5 @@ Hadoop Archive 简称 HAR，是一个高效地将小文件放入 HDFS 块中的�
 - 大表对大表：尽量减少数据集，可以通过分区表，避免扫描全表或者全字段；
 -  大表对小表：设置自动识别小表，将小表放入内存中去执行。
 
+# 参考文献
+https://blog.csdn.net/weixin_40861707/article/details/107537934
