@@ -1,4 +1,11 @@
-# 1. HBase 数据写入流程
+# 1. HBase 架构
+
+![](https://img-blog.csdnimg.cn/20200803183420279.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MDg2MTcwNw==,size_16,color_FFFFFF,t_70)
+
+- 每个HBase集群包含一个HMaster节点和多个HRegionServer节点(其中HMaster和HRegionServer的注册信息保存在Zookeeper上),同时Client进行读写操作时,也要通过Zookeeper访问
+META表的元信息；
+- 每个HRegionServer对应一个HLog日志文件(主要用于数据恢复),HLog日志文件的LOG_SPLIT信息,存储在Zookeeper中每个HRegionServer包含多个HRegion,每个HRegion对应多个store,每个store存储的是一个列簇的数据每个store包含一个Memstore和多个StoreFile,其中StoreFile的数据以HFile的形式存储在HDFS上。
+# 2. HBase 数据写入流程
 
 1) 客户端访问 ZooKeeper，从 Meta 表得到写入数据对应的 Region 信息和相应 的Region 服务器。
 
@@ -6,13 +13,13 @@
 
 3) 当多个 StoreFile 文件达到阈值后，会触发 Store.compact() 将多个 StoreFile 文件合并为一个 大文件。
 
-# 2. HBase 数据读取流程
+# 3. HBase 数据读取流程
 
 1) 客户端先访问 ZooKeeper，从 Meta 表读取 Region 信息对应的服务器。
 
 2) 客户端向对应 Region 服务器发送读取数据的请求，Region 接收请求后，先从 MemStore 查找数据；如果没有，再到 StoreFile 上读取，然后将数据返回给客户端。
 
-# 3. HDFS 和 HBase 各自使用场景
+# 4. HDFS 和 HBase 各自使用场景
 
 首先一点需要明白：Hbase 是基于 HDFS 来存储的。
 HDFS：
@@ -30,11 +37,11 @@ HBase：
 4. 大数据量（100s TB 级数据）且有快速随机访问的需求。如：淘宝的交易历史记录。数据量巨大无容置疑，面向普通用户的请求必然要即时响应。
 5. 业务场景简单，不需要关系数据库中很多特性（例如交叉列、交叉表，事务，连接等等）。
 
-# 4.  Hbase 的存储结构
+# 5.  Hbase 的存储结构
 
 Hbase 中的每张表都通过行键(rowkey)按照一定的范围被分割成多个子表（HRegion），默认一个 HRegion 超过 256M 就要被分割成两个，由 HRegionServer管理，管理哪些 HRegion 由 Hmaster 分配。 HRegion 存取一个子表时，会创建一个 HRegion 对象，然后对表的每个列族（Column Family）创建一个 store实例， 每个 store 都会有 0 个或多个 StoreFile 与之对应，每个 StoreFile都会对应一个 HFile，HFile 就是实际的存储文件，一个 HRegion 还拥有一个MemStore 实例。
 
-# 5. 热点现象（数据倾斜）怎么产生的，以及解决方法有哪些
+# 6. 热点现象（数据倾斜）怎么产生的，以及解决方法有哪些
 
 热点现象：
 某个小的时段内，对 HBase 的读写请求集中到极少数的 Region 上，导致这些region 所在的 RegionServer 处理请求量骤增，负载量明显偏大，而其他的RgionServer 明显空闲。
@@ -61,19 +68,29 @@ HBase 中的行是按照 rowkey 的字典顺序排序的，这种设计优化了
 
 5. **HBase 建表预分区**：创建 HBase 表时，就预先根据可能的 RowKey 划分出多个 region 而不是默认的一个，从而可以将后续的读写操作负载均衡到不同的 region 上，避免热点现象。
 
-# 6. HBase 的 rowkey 设计原则
+# 7. HBase 的 rowkey 设计原则
 
-长度原则：100 字节以内，8 的倍数最好，可能的情况下越短越好。因为 HFile是按照 key value 存储的，过长的 rowkey 会影响存储效率；其次，过长的 rowkey在 memstore 中较大，影响缓冲效果，降低检索效率。最后，操作系统大多为 64位，8 的倍数，充分利用操作系统的最佳性能。
-**散列原则**：高位散列，低位时间字段。避免热点问题。
-**唯一原则**：分利用这个排序的特点，将经常读取的数据存储到一块，将最近可能
-会被访问 的数据放到一块。
+**rowkey长度原则**
+rowkey是一个二进制码流，可以是任意字符串，最大长度 64kb ，实际应用中一般为10-100bytes，以 byte[] 形式保存，一般设计成定长。
 
-# 7. HBase 的列簇设计
+建议越短越好，不要超过16个字节，原因如下：
+
+- 数据的持久化文件HFile中是按照KeyValue存储的，如果rowkey过长，比如超过100字节，1000w行数据，光rowkey就要占用100*1000w=10亿个字节，将近1G数据，这样会极大影响HFile的存储效率；
+- MemStore将缓存部分数据到内存，如果rowkey字段过长，内存的有效利用率就会降低，系统不能缓存更多的数据，这样会降低检索效率；
+- 目前操作系统都是64位系统，内存8字节对齐，控制在16个字节，8字节的整数倍利用了操作系统的最佳特性。
+
+**rowkey散列原则**
+如果rowkey按照时间戳的方式递增，不要将时间放在二进制码的前面，建议将rowkey的高位作为散列字段，由程序随机生成，低位放时间字段，这样将提高数据均衡分布在每个RegionServer，以实现负载均衡的几率。如果没有散列字段，首字段直接是时间信息，所有的数据都会集中在一个RegionServer上，这样在数据检索的时候负载会集中在个别的RegionServer上，造成热点问题，会降低查询效率。
+
+**rowkey唯一原则**
+必须在设计上保证其唯一性，rowkey是按照字典顺序排序存储的，因此，设计rowkey的时候，要充分利用这个排序的特点，将经常读取的数据存储到一块，将最近可能会被访问的数据放到一块。
+
+# 8. HBase 的列簇设计
 
 原则：在合理范围内能尽量少的减少列簇就尽量减少列簇，因为列簇是共享region 的，每个列簇数据相差太大导致查询效率低下。
 最优：将所有相关性很强的 key-value 都放在同一个列簇下，这样既能做到查询效率最高，也能保持尽可能少的访问不同的磁盘文件。以用户信息为例，可以将必须的基本信息存放在一个列族，而一些附加的额外信息可以放在另一列族。
 
-# 8. HBase 中 compact 用途是什么，什么时候触发，分为哪两种，有什么区别
+# 9. HBase 中 compact 用途是什么，什么时候触发，分为哪两种，有什么区别
 
 在 hbase 中每当有 memstore 数据 flush 到磁盘之后，就形成一个 storefile，当 storeFile 的数量达到一定程度后，就需要将 storefile 文件来进行compaction 操作。
 Compact 的作用：
