@@ -59,7 +59,7 @@ JDK1.4 中新加入的 **NIO(New Input/Output) 类**，引入了一种基于**�
 ### 2.2.1 对象的创建
 
 下图便是 Java 对象的创建过程，我建议最好是能默写出来，并且要掌握每一步在做什么。
-![Java创建对象的过程](JVM基础.assets/Java创建对象的过程.png)
+![Java创建对象的过程](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Java/JVM/JVM基础.assets/Java创建对象的过程.png)
 
 #### Step1:类加载检查
 
@@ -110,11 +110,11 @@ JDK1.4 中新加入的 **NIO(New Input/Output) 类**，引入了一种基于**�
 
 1. **句柄：** 如果使用句柄的话，那么 Java 堆中将会划分出一块内存来作为句柄池，reference 中存储的就是对象的句柄地址，而句柄中包含了对象实例数据与类型数据各自的具体地址信息；
 
-   ![对象的访问定位-使用句柄](JVM基础.assets/对象的访问定位-使用句柄.png)
+   ![对象的访问定位-使用句柄](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Java/JVM/JVM基础.assets/对象的访问定位-使用句柄.png)
 
 2. **直接指针：** 如果使用直接指针访问，那么 Java 堆对象的布局中就必须考虑如何放置访问类型数据的相关信息，而 reference 中存储的直接就是对象的地址。
 
-![对象的访问定位-直接指针](JVM基础.assets/对象的访问定位-直接指针.png)
+![对象的访问定位-直接指针](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Java/JVM/JVM基础.assets/对象的访问定位-直接指针.png)
 
 **这两种对象访问方式各有优势。使用句柄来访问的最大好处是 reference 中存储的是稳定的句柄地址，在对象被移动时只会改变句柄中的实例数据指针，而 reference 本身不需要修改。使用直接指针访问方式最大的好处就是速度快，它节省了一次指针定位的时间开销。**
 
@@ -126,7 +126,7 @@ JDK1.4 中新加入的 **NIO(New Input/Output) 类**，引入了一种基于**�
 
 堆中几乎放着所有的对象实例，对堆垃圾回收前的第一步就是要判断哪些对象已经死亡（即不能再被任何途径使用的对象）。
 
-![](JVM基础.assets/11034259.png)
+![](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Java/JVM/JVM基础.assets/11034259.png)
 
 ### 3.1.1 引用计数法
 
@@ -153,7 +153,7 @@ public class ReferenceCountingGc {
 
 这个算法的基本思想就是通过一系列的称为 **“GC Roots”** 的对象作为起点，从这些节点开始向下搜索，节点所走过的路径称为引用链，当一个对象到 GC Roots 没有任何引用链相连的话，则证明此对象是不可用的。
 
-![可达性分析算法 ](JVM基础.assets/72762049.png)
+![可达性分析算法 ](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Java/JVM/JVM基础.assets/72762049.png)
 
 可作为 GC Roots 的对象包括下面几种:
 
@@ -199,7 +199,7 @@ JDK1.2 以后，Java 对引用的概念进行了扩充，将引用分为强引�
 
 ## 3.2 垃圾收集算法
 
-![垃圾收集算法分类](JVM基础.assets/垃圾收集算法.png)
+![垃圾收集算法分类](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Java/JVM/JVM基础.assets/垃圾收集算法.png)
 
 ### 3.2.1 标记-清除算法
 
@@ -208,19 +208,19 @@ JDK1.2 以后，Java 对引用的概念进行了扩充，将引用分为强引�
 1. **效率问题**
 2. **空间问题（标记清除后会产生大量不连续的碎片）**
 
-![](JVM基础.assets/标记-清除算法.jpeg)
+![](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Java/JVM/JVM基础.assets/标记-清除算法.jpeg)
 
 ### 3.2.2 标记-复制算法
 
 为了解决效率问题，“标记-复制”收集算法出现了。它可以将内存分为大小相同的两块，每次使用其中的一块。当这一块的内存使用完后，就将还存活的对象复制到另一块去，然后再把使用的空间一次清理掉。这样就使每次的内存回收都是对内存区间的一半进行回收。
 
-![复制算法](JVM基础.assets/90984624.png)
+![复制算法](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Java/JVM/JVM基础.assets/90984624.png)
 
 ### 3.2.3 标记-整理算法
 
 根据老年代的特点提出的一种标记算法，标记过程仍然与“标记-清除”算法一样，但后续步骤不是直接对可回收对象回收，而是让所有存活的对象向一端移动，然后直接清理掉端边界以外的内存。
 
-![标记-整理算法 ](JVM基础.assets/94057049.png)
+![标记-整理算法 ](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Java/JVM/JVM基础.assets/94057049.png)
 
 ### 3.2.4 分代收集算法
 
@@ -245,7 +245,7 @@ JDK1.2 以后，Java 对引用的概念进行了扩充，将引用分为强引�
 - **重新标记：** 重新标记阶段就是为了修正并发标记期间因为用户程序继续运行而导致标记产生变动的那一部分对象的标记记录，这个阶段的停顿时间一般会比初始标记阶段的时间稍长，远远比并发标记阶段时间短
 - **并发清除：** 开启用户线程，同时 GC 线程开始对未标记的区域做清扫。
 
-![CMS 垃圾收集器 ](JVM基础.assets/CMS收集器.png)
+![CMS 垃圾收集器 ](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Java/JVM/JVM基础.assets/CMS收集器.png)
 
 从它的名字就可以看出它是一款优秀的垃圾收集器，主要优点：**并发收集、低停顿**。但是它有下面三个明显的缺点：
 
@@ -285,7 +285,7 @@ G1 收集器的运作大致分为以下几个步骤：
 
 一个类的完整生命周期如下：
 
-![](JVM基础.assets/类加载过程-完善.png)
+![](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Java/JVM/JVM基础.assets/类加载过程-完善.png)
 
 ## 7.2 类加载过程
 
@@ -323,7 +323,7 @@ Class 文件需要加载到虚拟机中之后才能运行和使用，那么虚�
 
 每一个类都有一个对应它的类加载器。系统中的 ClassLoader 在协同工作的时候会默认使用 **双亲委派模型** 。即在类加载的时候，系统会首先判断当前类是否被加载过。已经被加载的类会直接返回，否则才会尝试加载。加载的时候，首先会把该请求委派给父类加载器的 `loadClass()` 处理，因此所有的请求最终都应该传送到顶层的启动类加载器 `BootstrapClassLoader` 中。当父类加载器无法处理时，才由自己来处理。当父类加载器为 null 时，会使用启动类加载器 `BootstrapClassLoader` 作为父类加载器。
 
-![ClassLoader](JVM基础.assets/classloader_WPS图片.png)
+![ClassLoader](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Java/JVM/JVM基础.assets/classloader_WPS图片.png)
 
 ### 双亲委派模型的好处
 
@@ -382,7 +382,7 @@ Java内存模型定义了以下8种操作，虚拟机实现时需要保证每个
 
 为了更好地理解，我画了一个简单的 CPU Cache 示意图如下（实际上，现代的 CPU Cache 通常分为三层，分别叫 L1,L2,L3 Cache）:
 
-![CPU Cache](JVM基础.assets/303a300f-70dd-4ee1-9974-3f33affc6574.png)
+![CPU Cache](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Java/JVM/JVM基础.assets/303a300f-70dd-4ee1-9974-3f33affc6574.png)
 
 **CPU Cache 的工作方式：**
 
@@ -394,13 +394,13 @@ Java内存模型定义了以下8种操作，虚拟机实现时需要保证每个
 
 在 JDK1.2 之前，Java 的内存模型实现总是从**主存**（即共享内存）读取变量，是不需要进行特别的注意的。而在当前的 Java 内存模型下，线程可以把变量保存**本地内存**（比如机器的寄存器）中，而不是直接在主存中进行读写。这就可能造成一个线程在主存中修改了一个变量的值，而另外一个线程还继续使用它在寄存器中的变量值的拷贝，造成**数据的不一致**。
 
-![JMM(Java内存模型)](JVM基础.assets/0ac7e663-7db8-4b95-8d8e-7d2b179f67e8.png)
+![JMM(Java内存模型)](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Java/JVM/JVM基础.assets/0ac7e663-7db8-4b95-8d8e-7d2b179f67e8.png)
 
 要解决这个问题，就需要把变量声明为 **`volatile`** ，这就指示 JVM，这个变量是共享且不稳定的，每次使用它都到主存中进行读取。
 
 所以，**`volatile` 关键字 除了防止 JVM 的指令重排 ，还有一个重要的作用就是保证变量的可见性。**
 
-![volatile关键字的可见性](JVM基础.assets/d49c5557-140b-4abf-adad-8aac3c9036cf.png)
+![volatile关键字的可见性](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Java/JVM/JVM基础.assets/d49c5557-140b-4abf-adad-8aac3c9036cf.png)
 
 ### 12.3.3 Java内存模型(并发编程的)三个重要特性
 
@@ -427,7 +427,7 @@ Java中线程的状态分为6种。
 4. 等待(WAITING)：进入该状态的线程需要等待其他线程做出一些特定动作（通知或中断）。
 5. 超时等待(TIMED_WAITING)：该状态不同于WAITING，它可以在指定的时间后自行返回。
 6. 终止(TERMINATED)：表示该线程已经执行完毕。
-![线程状态图](JVM基础.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3BhbmdlMTk5MQ==,size_16,color_FFFFFF,t_70.jpeg)
+![线程状态图](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Java/JVM/JVM基础.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3BhbmdlMTk5MQ==,size_16,color_FFFFFF,t_70.jpeg)
 
 [Java 线程的状态转换详细理解](https://juejin.cn/post/6986240210178670622)
 

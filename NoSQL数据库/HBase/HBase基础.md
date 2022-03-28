@@ -6,7 +6,7 @@ HBase是一个开源的、分布式的、可扩展的、列存储的、版本化
 
 HBase系统架构图如下：
 
-![image-20211211133404058](HBase基础.assets/1.png)
+![image-20211211133404058](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/NoSQL数据库/HBase/HBase基础.assets/1.png)
 
 ## 2.1 客户端
 
@@ -250,7 +250,7 @@ HBase 自身并不具备数据复制和维护数据副本的功能，而依赖 H
 
 使用 show_filter 命令可以查看当前 HBase 支持的过滤器类型，如下图所示。
 
-![image-20211211204252489](HBase基础.assets/2.png)
+![image-20211211204252489](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/NoSQL数据库/HBase/HBase基础.assets/2.png)
 
 使用上述过滤器时，一般需要配合比较运算符或比较器使用，如下面两个表所示。
 
@@ -290,7 +290,7 @@ RowFilter 可以配合比较器和运算符，实现行键字符串的比较和�
 
 实现上述匹配条件的过滤命令以及显示结果如下图所示。
 
- ![](HBase基础.assets/3.png)
+ ![](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/NoSQL数据库/HBase/HBase基础.assets/3.png)
 
 针对行键进行匹配的过滤器还有 PrefixFilter、KeyOnlyFilter、FirstKeyOnlyFilter 和 InclusiveStopFilter，其具体含义和使用示例如下表所示。
 
@@ -305,7 +305,7 @@ RowFilter 可以配合比较器和运算符，实现行键字符串的比较和�
 
 上表中的命令示例操作结果如下图所示。
 
- ![](HBase基础.assets/4.png)
+ ![](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/NoSQL数据库/HBase/HBase基础.assets/4.png)
 
 ### 3.6.4 列族与列过滤器
 
@@ -331,7 +331,7 @@ MultipleColumnPrefixFilter 过滤器是对 ColumnPrefixFilter 的延伸，可以
 ColumnRangeFilter过滤器则可以扫描出符合过滤条件的列范围，起始和终止列名用单引号引用，true 和 false 参数可指明结果中包含的起始或终止列。
 
 上表中的过滤器示例在 HBase Shell 中扫描结果如下图所示。
- ![](HBase基础.assets/5.png)
+ ![](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/NoSQL数据库/HBase/HBase基础.assets/5.png)
 
 ### 3.6.5 值过滤器
 
@@ -349,7 +349,7 @@ SingleColumnValueFilter 和 SingleColumnValueExcludeFilter 过滤器扫描的结
 
 上表中的值过滤器示例在 HBase Shell 中扫描结果如下图所示。
 
- ![](HBase基础.assets/6.png)
+ ![](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/NoSQL数据库/HBase/HBase基础.assets/6.png)
 
 ### 3.6.6 其他过滤器
 
@@ -383,13 +383,13 @@ HBase的逻辑数据模型，是有空值的，但真实的物理存储是无空
 
 在HBase中，表的所有行都是按照 RowKey 的字典序排列的，表在行的方向上分割为多个分区（Region），如下图所示。
 
-![](HBase基础.assets/7.png)
+![](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/NoSQL数据库/HBase/HBase基础.assets/7.png)
 
 每张表一开始只有一个 Region，但是随着数据的插入，HBase 会根据一定的规则将表进行水平拆分，形成两个 Region。当表中的行越来越多时，就会产生越来越多的 Region，而这些 Region 无法存储到一台机器上时，则可将其分布存储到多台机器上。
 
 Master 主服务器把不同的 Region 分配到不同的 Region 服务器上，同一个行键的 Region 不会被拆分到多个 Region 服务器上。每个 Region 服务器负责管理一个 Region，通常在每个 Region 服务器上会放置 10 ~ 1000 个 Region，HBase中Region 的物理存储如下图所示。
 
-![](HBase基础.assets/8.png)
+![](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/NoSQL数据库/HBase/HBase基础.assets/8.png)
 
 **客户端在插入、删除、查询数据时需要知道哪个 Region 服务器上存储所需的数据，这个查找 Region 的过程称为 Region 定位。**
 
@@ -404,7 +404,7 @@ HBase 中的每个 Region 由三个要素组成，包括 Region 所属的表、�
 使用 scan 命令可查看 Meta 表的结构，如图所示。
 
 
-![img](HBase基础.assets/9.png)
+![img](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/NoSQL数据库/HBase/HBase基础.assets/9.png)
 
 Meta 表中的每一行记录了一个 Region 的信息。RowKey 包含表名、起始行键和时间戳信息，中间用逗号隔开，第一个 Region 的起始行键为空。时间戳之后用`.`隔开的为分区名称的编码字符串，该信息是由前面的表名、起始行键和时间戳进行字符串编码后形成的。
 
@@ -416,7 +416,7 @@ Server 记录了管理该 Region 的 Region 服务器的地址，如 localhost:1
 
 ### 5.1.3 Region定位
 
-![img](HBase基础.assets/10.png)
+![img](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/NoSQL数据库/HBase/HBase基础.assets/10.png)
 
 **定位流程：**客户端通过 ZooKeeper 获取 分区Meta 表位置，查询分区Meta表信息得到所需的表和行键所在的Region位置，然后从Meta表（映射表，映射region和regionServer的对应关系）找出Region所在的Region服务器，从 Region 服务器上找到所需的数据。一般客户端获取 Region 信息后会进行缓存，用户下次再查询不必从 ZooKeeper 开始寻址。
 
@@ -430,7 +430,7 @@ HBase 群集数据的构成如图所示。
 
 
 
-![img](HBase基础.assets/11.png)
+![img](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/NoSQL数据库/HBase/HBase基础.assets/11.png)
 
 ### 5.2.1 MemStore
 
@@ -452,7 +452,7 @@ Store 的合并和分裂过程如下图所示。
 
 
 
-![img](HBase基础.assets/12.png)
+![img](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/NoSQL数据库/HBase/HBase基础.assets/12.png)
 
 ### 5.2.3 HFile
 
@@ -462,7 +462,7 @@ HFile 的存储格式如下图所示。
 
 
 
-![img](HBase基础.assets/13.png)
+![img](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/NoSQL数据库/HBase/HBase基础.assets/13.png)
 
 HFile 文件是不定长的，长度固定的只有其中的两块：Trailer 和 File Info。Trailer 中有指针指向其他数据块的起始点，File Info 记录了文件的一些 Meta 信息。每个 Data 块的大小可以在创建一个 Table 的时候通过参数指定（默认块大小为 64KB）。每个 Data 块除了开头的 Magic 以外就是由一个键值对拼接而成的，Magic 内容是一些随机数字，用于防止数据损坏。
 
@@ -470,7 +470,7 @@ HFile 里面的每个键值对就是一个简单的 Byte 数组。但是这个 B
 
 
 
-![img](HBase基础.assets/14.png)
+![img](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/NoSQL数据库/HBase/HBase基础.assets/14.png)
 
 键值对结构以两个固定长度的数值开始，分别表示 Key 的长度和 Value 的长度。紧接着是 Key，Key 以 RowLength 开始，是固定长度的数值，表示 RowKey 的长度；接着是 Row，然后是固定长度的数值 ColumnFamilyLength，表示 Family 的长度；之后是 Family 列族，接着是 Qualifier 列标识符，Key 最后以两个固定长度的数值 Time Stamp 和 Key Type(Put/Delete) 结束。Value部分没有这么复杂的结构，就是纯粹的二进制数据。
 
@@ -494,7 +494,7 @@ HFile 里面的每个键值对就是一个简单的 Byte 数组。但是这个 B
 
 
 
-![img](HBase基础.assets/15.png)
+![img](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/NoSQL数据库/HBase/HBase基础.assets/15.png)
 
 如上图所示，每个 Region 服务器都有一个 HLog 文件，同一个 Region 服务器的 Region 对象共用一个 HLog，**HLog 是一种预写日志（Write Ahead Log）文件。**
 
@@ -520,7 +520,7 @@ StoreFile 在底层文件系统中由 HFile 实现，也可以把 Store 看作�
 
 HFile 的合并分为两种类型，分别是 Minor 合并和 Major 合并。这两种合并都发生在 Store 内部，不是 Region 的合并，如下图所示。
 
-![img](HBase基础.assets/16.png)
+![img](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/NoSQL数据库/HBase/HBase基础.assets/16.png)
 
 
 #### 5.3.1.1 Minor 合并
@@ -554,7 +554,7 @@ Region 拆分是 HBase 能够拥有良好扩展性的最重要因素。一旦 Re
 
 
 
-![img](HBase基础.assets/17.png)
+![img](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/NoSQL数据库/HBase/HBase基础.assets/17.png)
 
 这个过程是由 RegionServer 完成的，其拆分流程如下。
 

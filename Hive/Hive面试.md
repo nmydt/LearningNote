@@ -1,6 +1,6 @@
 # 1. Hive架构
 
-![](Hive面试.assets/Hive架构.png)
+![](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Hive/Hive面试.assets/Hive架构.png)
 
 Hive通过给用户提供的一系列交互接口，接收到用户的指令(SQL)，使用自己的Driver，结合元数据(MetaStore)，将这些指令翻译成MapReduce，提交到Hadoop中执行。
 最后，将执行返回的结果输出到用户交互接口。
@@ -61,7 +61,7 @@ ORC:
 
 ## 5.1 星型模型
 
-![](Hive面试.assets/1.png)
+![](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Hive/Hive面试.assets/1.png)
 
 星型模式(Star Schema)是最常用的维度建模方式。星型模式是以事实表为中心，所有的维度表直接连接在事实表上，像星星一样。 星形模式的维度建模由一个事实表和一组维表成，且具有以下特点：
 
@@ -71,13 +71,13 @@ ORC:
 
 ## 5.2 雪花模型
 
-![](Hive面试.assets/2.png)
+![](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Hive/Hive面试.assets/2.png)
 
 雪花模型(Snowflake Schema)是对星形模型的扩展。雪花模型的维度表可以拥有其他维度表的，虽然这种模型相比星型更规范一些，但是由于这种模型不太容易理解，维护成本比较高，而且性能方面需要关联多层维表，性能比星型模型要低。
 
 ## 5.3 星座模型
 
-![image-20211219210029432](Hive面试.assets/3.png)
+![image-20211219210029432](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Hive/Hive面试.assets/3.png)
 
 星座模型是星型模型延伸而来，星型模型是基于一张事实表的，而星座模型是基于多张事实表的，而且共享维度信息。前面介绍的两种维度建模方法都是多维表对应单事实表，但在很多时候维度空间内的事实表不止一个，而一个维表也可能被多个事实表用到。在业务发展后期，绝大部分维度建模都采用的是星座模型。
 

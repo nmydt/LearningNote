@@ -1,6 +1,6 @@
 # 1. HBase 架构
 
-![](https://img-blog.csdnimg.cn/20200803183420279.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MDg2MTcwNw==,size_16,color_FFFFFF,t_70)
+![](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/NoSQL数据库/HBase/https://img-blog.csdnimg.cn/20200803183420279.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MDg2MTcwNw==,size_16,color_FFFFFF,t_70)
 
 - 每个HBase集群包含一个HMaster节点和多个HRegionServer节点(其中HMaster和HRegionServer的注册信息保存在Zookeeper上),同时Client进行读写操作时,也要通过Zookeeper访问
 META表的元信息；

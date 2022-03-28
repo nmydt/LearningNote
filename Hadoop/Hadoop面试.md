@@ -4,7 +4,7 @@
 
 ### HDFS读流程
 
-![image-20211210002543711](Hadoop面试.assets/1.png)
+![image-20211210002543711](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Hadoop/Hadoop面试.assets/1.png)
 
 1. HDFS客户端通过`DistributedFileSystem`对象的open()方法打开要读取的文件。
 2. 该对象负责向远程的NameNode发起RPC调用，得到文件数据块信息，返回数据块列表。对于每个数据块，NameNode返回该数据块的DataNode地址。
@@ -15,7 +15,7 @@
 
 ### HDFS写流程
 
-![image-20211209140232908](Hadoop面试.assets/2.png)
+![image-20211209140232908](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Hadoop/Hadoop面试.assets/2.png)
 
 1. 客户端调用`DistributedFileSystem`对象的`create()`方法创建一个文件输出流对象。
 2. `DistributedFileSystem`对象向远程的NameNode节点发起RPC调用，NameNode会检查文件是否存在，用户是否有权限新建文件。如果满足条件，则返回给客户端一个可以上传的信息。
@@ -181,7 +181,7 @@ copy 阶段包含一个 eventFetcher 来获取已完成的 map 列表，由 Fetc
 
 shuffle 是 Mapreduce 的核心，它分布在 Mapreduce 的 map 阶段和 reduce阶段。一般把从 Map 产生输出开始到 Reduce 取得数据作为输入之前的过程称作 shuffle。
 
-![](Hadoop面试.assets/3.png)
+![](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Hadoop/Hadoop面试.assets/3.png)
 
 **Map端**
 
@@ -244,13 +244,13 @@ Apache 版本的 hadoop 默认使用的是 Capacity Scheduler 调度方式。CDH
 
 1. **FIFO Scheduler（先进先出调度器）：**
 
-   ![](Hadoop面试.assets/4.png)
+   ![](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Hadoop/Hadoop面试.assets/4.png)
 
    FIFO Scheduler 把应用按提交的顺序排成一个队列，这是一个先进先出队列，在进行资源分配的时候，先给队列中最头上的应用进行分配资源，待最头上的应用需求满足后再给下一个分配，以此类推。但是大的应用可能会占用所有集群资源，这就导致其它应用被阻塞。
 
 2. **Capacity Scheduler（容量调度器）：**
 
-   ![](Hadoop面试.assets/5.png)
+   ![](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Hadoop/Hadoop面试.assets/5.png)
 
    Capacity Scheduler容量调度适合多用户调度器，它以队列为单位划分资源。每个队列可设定一定比例的资源最低保证和使用上限。每个用户也可设置一定的资源使用上限，以防资源滥用。并支持资源共享，将队列剩余资源共享给其他队列使用。
 
@@ -258,7 +258,7 @@ Apache 版本的 hadoop 默认使用的是 Capacity Scheduler 调度方式。CDH
 
 3. **Fair Scheduler（公平调度器）：**
 
-   ![](Hadoop面试.assets/6.png)
+   ![](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Hadoop/Hadoop面试.assets/6.png)
 
    在 Fair 调度器中，我们不需要预先占用一定的系统资源，Fair 调度器会为所有运行的 job 动态的调整系统资源。
    

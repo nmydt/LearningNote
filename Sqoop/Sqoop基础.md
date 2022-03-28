@@ -71,7 +71,7 @@ MySQL中提前准备好数据，测试导入到HDFS
 
   当sqoop使用--query+sql执行多个maptask并行运行导入数据时，每个maptask将执行一部分数据的导入，原始数据需要使用'--split-by 某个字段'来切分数据，不同的数据交给不同的maptask去处理。maptask执行sql副本时，需要在where条件中添加$CONDITIONS条件，这个是linux系统的变量，可以根据sqoop对边界条件的判断，来替换成不同的值，这就是说若split-by id，则sqoop会判断id的最小值和最大值判断id的整体区间，然后根据maptask的个数来进行区间拆分，每个maptask执行一定id区间范围的数值导入任务，如下为示意图。
 
-  ![](Sqoop基础.assets\1.png)
+  ![](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Sqoop/Sqoop基础.assets\1.png)
 
 ## 1.2MySQL导入到Hive
 

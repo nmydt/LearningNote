@@ -78,7 +78,7 @@ LOAD DATA INPATH '/user/tom/data.txt' INTO TABLE external_table;
 
 ## 4.4 分区表
 
-![](Hive基础.assets/1.png)
+![](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Hive/Hive基础.assets/1.png)
 为了提高查询数据的效率，Hive 提供了表分区机制。分区表基于分区键把具有相同分区键的数据存储在一个目录下，在查询某一个分区的数据的时候，只需要查询相对应目录下的数据，而不会执行全表扫描，也就是说，Hive 在查询的时候会进行分区剪裁。每个表可以有一个或多个分区键。
 
 创建分区表语法：
@@ -98,7 +98,7 @@ PARTITIONED BY (partition1 data_type, partition2 data_type,….);
 
 ## 4.5 分桶表
 
-![](Hive基础.assets/2.png)
+![](https://cdn.jsdelivr.net/gh/nmydt/LearningNote@main/Hive/Hive基础.assets/2.png)
 
 Hive 可以对每一个表或者是分区，进一步组织成桶，也就是说桶是更为细粒度的数据范围划分。Hive 是针对表的某一列进行分桶。Hive 采用对表的列值进行哈希计算，然后除以桶的个数求余的方式决定该条记录存放在哪个桶中。分桶的好处是可以获得更高的查询处理效率。使取样更高效。
 
