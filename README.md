@@ -1,4 +1,4 @@
-# *BigData Learning Notes*
+# BigData Learning Notes
 
 ## Hadoop
 
