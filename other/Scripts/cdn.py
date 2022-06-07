@@ -3,7 +3,7 @@ import requests
 import time
 # URL工厂，转换URL
 URLS = []
-
+#cdns = ["cdn.jsdelivr.net", "fastly.jsdelivr.net", "gcore.jsdelivr.net"]
 def UrlFactory(url, index=''):
     # cdn转github
     if "cdn.jsdelivr.net" in url:
