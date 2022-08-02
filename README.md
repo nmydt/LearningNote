@@ -37,7 +37,8 @@
 [盖若](https://www.gairuo.com/)
 
 ## 求职
-[简历制作](https://www.52cv.com/)
+[简历制作1](https://www.52cv.com/)
+[简历制作2](https://www.zhiyeapp.com/)
 
 [Boss直聘](https://www.zhipin.com/)
 
