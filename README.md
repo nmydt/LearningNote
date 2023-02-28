@@ -37,8 +37,10 @@
 [盖若](https://www.gairuo.com/)
 
 ## 求职
-[简历制作1](https://www.52cv.com/)
-[简历制作2](https://www.zhiyeapp.com/)
+[52CV(推荐)](https://www.52cv.com/) 若遇到导出空格变成Tab键，使用左对齐即可
+
+[知页](https://www.zhiyeapp.com/)
+[极简](https://new.polebrief.com/edit)
 
 [Boss直聘](https://www.zhipin.com/)
 
